@@ -4,13 +4,16 @@ import com.company.handlers.Tuple;
 import com.company.handlers.enumCommands;
 import com.company.handlers.enumState;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Scanner;
 
 /**
- * cpu_altera_programa = resetInstruction / insertInstruction
- * cpu_altera_dados = changeMemory / setMemory
+ * cpu_altera_programa = insertInstruction
+ * cpu_altera_dados = changeMemory
  * cpu_salva_dados = getMemory
  * cpu_interrupcao = setCpuStop
  * cpu_retorna_interrupcao = isCpuStop
@@ -44,7 +47,7 @@ public class CPU extends cpuBasic {
     public void creteLog(String file) {
         try {
 
-            FileWriter myWriter = new FileWriter(file + ".txt");
+            FileWriter myWriter = new FileWriter(file);
 
             myWriter.write("PC: " + this.PC + "\n");
             myWriter.write("Accumulator: " + this.Accumulator + "\n");
@@ -70,7 +73,7 @@ public class CPU extends cpuBasic {
         if (PC < getSizeProgram())
             return super.getInstruction(PC);
         else
-            return new Tuple<Integer, Integer>(enumCommands.ERROR.getCommand(), null);
+            return new Tuple<>(enumCommands.ERROR.getCommand(), null);
     }
 
     public void resetInstructions(String[] myString) {
@@ -78,6 +81,24 @@ public class CPU extends cpuBasic {
         this.insertInstruction(myString);
     }
 
+    public void loadFile(String str) {
+        try {
+            File myObj = new File(str);
+            Scanner myReader = new Scanner(myObj);
+            while (myReader.hasNextLine()) {
+                String data = myReader.nextLine();
+                this.insertInstruction(data);
+            }
+            myReader.close();
+        } catch (FileNotFoundException e) {
+            System.out.println("An error occurred.");
+            e.printStackTrace();
+        }
+    }
+
+    public void setUpMemory (int i) {
+        this.memory = new int[i];
+    }
 
     public void changeMemory(int[] n){
         for (int i = 0; i < n.length && i < this.memory.length; i++)

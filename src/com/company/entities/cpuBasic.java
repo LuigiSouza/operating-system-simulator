@@ -26,10 +26,10 @@ public class cpuBasic {
 
     private enumCommands tryEnum (String myString) {
         try {
-            return (enumCommands)Enum.valueOf(enumCommands.class, myString);
+            return Enum.valueOf(enumCommands.class, myString);
         } catch (IllegalArgumentException e) {
             // log error or something here
-            return (enumCommands)Enum.valueOf(enumCommands.class, "ERROR");
+            return Enum.valueOf(enumCommands.class, "ERROR");
         }
     }
     public void insertInstruction(String[] myString) {
@@ -59,7 +59,7 @@ public class cpuBasic {
             return memoryInstructions.get(PC);
         else {
             this.PC--;
-            return new Tuple<Integer, Integer>(enumCommands.ERROR.getCommand(), null);
+            return new Tuple<>(enumCommands.ERROR.getCommand(), null);
         }
     }
 
@@ -134,7 +134,7 @@ public class cpuBasic {
 
     public static String[] mySplit(String str, String regex)
     {
-        Vector<String> result = new Vector<String>();
+        Vector<String> result = new Vector<>();
         int start = 0;
         int pos = str.indexOf(regex);
         while (pos>=start) {

@@ -1,12 +1,11 @@
 package com.company;
 
 import com.company.entities.CPU;
+import com.company.entities.cpuBasic;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.Arrays;
 import java.util.Scanner;
-import java.util.Vector;
 
 public class Main {
 
@@ -22,21 +21,10 @@ public class Main {
             "NEG",
             "PARA"
         };*/
-        try {
-            File myObj = new File("filename.txt");
-            Scanner myReader = new Scanner(myObj);
-            while (myReader.hasNextLine()) {
-                String data = myReader.nextLine();
-                cpu.insertInstruction(data);
-            }
-            myReader.close();
-        } catch (FileNotFoundException e) {
-            System.out.println("An error occurred.");
-            e.printStackTrace();
-        }
+        cpu.loadFile("filename.txt");
 
         cpu.executeAll();
-        cpu.creteLog("text_log");
+        cpu.creteLog("text_log.txt");
 	    // write your code here
     }
 }
