@@ -10,12 +10,21 @@ public class Main {
     public static void main(String[] args) {
 
         Scanner sc = new Scanner (System.in);
-        String myString = sc.next();
-        int myInt = sc.nextInt();
+        String[] myString = {
+            "CARGI 10",
+            "ARMM 2",
+            "CARGI 32",
+            "SOMA 2",
+            "ARMM 0",
+            "PARA"
+        };
 
-        CPU cpu = new CPU();
+        //int myInt = sc.nextInt();
+
+        CPU cpu = new CPU(56);
         cpu.insertInstruction(myString);
-        //System.out.println(cpu.execute());
+        while( !cpu.isCpuStop() )
+            cpu.execute();
 	// write your code here
     }
 }
