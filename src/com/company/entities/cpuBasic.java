@@ -2,31 +2,31 @@ package com.company.entities;
 
 import com.company.handlers.Tuple;
 import com.company.handlers.enumCommands;
+import com.company.handlers.enumState;
 
-import java.io.FileWriter;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Vector;
 
 public class cpuBasic {
 
     protected int PC;
     protected int Accumulator;
 
-    protected boolean cpuStop;
+    protected enumState cpuStop;
 
     protected int[] memory;
+    private int sizeProgram;
 
     /**
      *  First Integer: instruction index
      *  Second Integer: argument (if needed)
      */
-    private ArrayList<Tuple<Integer, Integer>> memoryInstructions = new ArrayList<>();
+    private final ArrayList<Tuple<Integer, Integer>> memoryInstructions = new ArrayList<>();
 
     private enumCommands tryEnum (String myString) {
         try {
-            enumCommands myEnum = (enumCommands)Enum.valueOf(enumCommands.class, myString);
-            return myEnum;
+            return (enumCommands)Enum.valueOf(enumCommands.class, myString);
         } catch (IllegalArgumentException e) {
             // log error or something here
             return (enumCommands)Enum.valueOf(enumCommands.class, "ERROR");
@@ -35,12 +35,13 @@ public class cpuBasic {
     public void insertInstruction(String[] myString) {
         for(String v : myString)
             insertInstruction(v);
+        setSizeProgram();
     }
     public void insertInstruction(String myString) {
-        String[] parsed = myString.split(" ");
+        String[] parsed = mySplit(myString, " ");
 
         if (parsed.length > 2)
-            throwError();
+            throwError(enumState.InvalidInstructions.getState());
 
         String cmd = parsed[0];
         enumCommands myEnum = tryEnum(cmd);
@@ -48,30 +49,60 @@ public class cpuBasic {
         if (parsed.length > 1)
             memoryInstructions.add(new Tuple<>(myEnum.getCommand(), Integer.parseInt(parsed[1])));
         else
-            memoryInstructions.add(new Tuple<>(myEnum.getCommand(),null));
+            memoryInstructions.add(new Tuple<>(myEnum.getCommand(), null));
+
     }
 
-    public Tuple<Integer, Integer> getInstruction(int PC) {
-        return memoryInstructions.get(PC);
+    protected Tuple<Integer, Integer> getInstruction(int PC) {
+
+        if (PC < getSizeProgram())
+            return memoryInstructions.get(PC);
+        else {
+            this.PC--;
+            return new Tuple<Integer, Integer>(enumCommands.ERROR.getCommand(), null);
+        }
     }
 
     private void CARGI(int n) {
         Accumulator = n;
     }
     private void CARGM(int n) {
-        memory[n] = Accumulator;
+        if(n < memory.length)
+            Accumulator = memory[n];
+        else
+            throwError(2);
     }
     private void CARGX(int n) {
-        Accumulator = memory[memory[n]];
+        if(n < memory.length) {
+            int aux = memory[n];
+            if (aux < memory.length) {
+                Accumulator = memory[memory[n]];
+                return;
+            }
+        }
+        throwError(2);
     }
     private void ARMM(int n) {
-        memory[n] = Accumulator;
+        if(n < memory.length)
+            memory[n] = Accumulator;
+        else
+            throwError(2);
     }
     private void ARMX(int n) {
-        memory[memory[n]] = Accumulator;
+        if(n < memory.length) {
+            int aux = memory[n];
+            if (aux < memory.length) {
+                memory[memory[n]] = Accumulator;
+                return;
+            }
+        }
+        throwError(2);
     }
     private void SOMA(int n) {
-        Accumulator += memory[n];
+        if(n < memory.length)
+            Accumulator += memory[n];
+        else
+            throwError(2);
     }
     private void NEG() {
         Accumulator *= -1;
@@ -82,7 +113,7 @@ public class cpuBasic {
         }
     }
     private void ERROR() {
-        throwError();
+        throwError(enumState.InvalidInstructions.getState());
     }
 
     private interface instruction {
@@ -101,13 +132,31 @@ public class cpuBasic {
             n -> ERROR(),
     };
 
-    private void throwError() {
+    public static String[] mySplit(String str, String regex)
+    {
+        Vector<String> result = new Vector<String>();
+        int start = 0;
+        int pos = str.indexOf(regex);
+        while (pos>=start) {
+            if (pos>start) {
+                result.add(str.substring(start,pos));
+            }
+            start = pos + regex.length();
+            pos = str.indexOf(regex,start);
+        }
+        if (start<str.length()) {
+            result.add(str.substring(start));
+        }
+        return result.toArray(new String[0]);
+    }
 
-        cpuStop = true;
+    private void throwError(int i) {
+
+        cpuStop.setState(i);
 
         /*
         try {
-            FileWriter myWriter = new FileWriter("Error_log.txt");
+            FileWriter myWriter = new FileWriter("filename.txt");
 
             myWriter.write("PC: " + PC + "\n");
             myWriter.write("Accumulator: " + Accumulator + "\n");
@@ -122,22 +171,27 @@ public class cpuBasic {
             System.out.println("Invalid instruction, error in command line on PC: " + PC + ". Error_log not created.");
             e.printStackTrace();
         }*/
-
     }
 
     public void execute() {
-        Tuple<Integer, Integer> aux = getInstruction(PC);
+        Tuple<Integer, Integer> aux = memoryInstructions.get(PC);
         int i = aux.getX();
         Object n = aux.getY();
 
         if(i == 6 && n != null || i != 6 && n == null) {
-            throwError();
+            throwError(enumState.InvalidInstructions.getState());
             return;
         }
         PC++;
         getInstruction[i].execute(n);
 
-        System.out.println("value Pc: " + PC + ", instruction type: " + enumCommands.values()[i] + ", A " + Accumulator+ ", memory " + Arrays.toString(memory));
+        System.out.println("value Pc: " + PC + ", instruction type: " + enumCommands.values()[i] + ", A: " + Accumulator+ ", memory: " + Arrays.toString(memory));
     }
+
+    public void clearInstructions() { memoryInstructions.clear(); }
+
+    protected int getSizeProgram () { return sizeProgram; }
+
+    protected void setSizeProgram() { sizeProgram = memoryInstructions.size(); }
 
 }
