@@ -1,4 +1,4 @@
-package com.company.assets;
+package com.company.handlers;
 
 public enum enumCommands {
     CARGI(0),
@@ -8,9 +8,10 @@ public enum enumCommands {
     ARMX(4),
     SOMA(5),
     NEG(6),
-    DESVZ(7);
+    DESVZ(7),
+    ERROR(8);
 
-    private int command;
+    private final int command;
 
     enumCommands(int i) {
         this.command = i;

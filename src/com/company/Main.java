@@ -1,7 +1,7 @@
 package com.company;
 
 import com.company.entities.CPU;
-import com.company.assets.enumCommands;
+import com.company.handlers.enumCommands;
 
 import java.util.Scanner;
 
@@ -11,12 +11,11 @@ public class Main {
 
         Scanner sc = new Scanner (System.in);
         String myString = sc.next();
-
-        enumCommands myEnum = (enumCommands)Enum.valueOf(enumCommands.class, myString);
-        System.out.println(myEnum.getCommand());
+        int myInt = sc.nextInt();
 
         CPU cpu = new CPU();
-        System.out.println(cpu.execute(myEnum.getCommand()));
+        cpu.insertInstruction(myString);
+        //System.out.println(cpu.execute());
 	// write your code here
     }
 }
