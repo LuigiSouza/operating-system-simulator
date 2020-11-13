@@ -169,9 +169,11 @@ public class cpuBasic {
     }
 
     public void popInstruction() {
+        if (getSizeProgram() <= 0)
+            return;
         memoryInstructions.remove(memoryInstructions.get(memoryInstructions.size()-1));
         setSizeProgram();
-        if(PC >= getSizeProgram())
+        if(PC >= getSizeProgram() && PC > 0)
             PC--;
     }
 
