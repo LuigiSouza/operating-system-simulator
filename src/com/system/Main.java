@@ -9,7 +9,8 @@ public class Main {
 
     public static void main(String[] args) {
 
-        JFrame frame = new Interface();
+        CPU cpu = new CPU(8);
+        JFrame frame = new Interface(cpu);
 
         /*
         CPU cpu = new CPU(128);

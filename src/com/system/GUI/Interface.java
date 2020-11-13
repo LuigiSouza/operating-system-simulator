@@ -2,91 +2,170 @@ package com.system.GUI;
 
 import com.system.entities.CPU;
 import com.system.entities.Registers;
+import com.system.handlers.enumCommands;
 
 import javax.swing.*;
+import javax.swing.text.NumberFormatter;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.io.IOException;
+import java.net.URI;
+import java.text.NumberFormat;
 import java.util.Arrays;
 
 public class Interface extends JFrame {
-    private JTextField MemoryField;
-    private JTextArea InstructionsField;
     private JButton RunAll;
     private JButton Run;
-    private JTextField PCField;
-    private JTextField AccumulatorField;
-    private JTextField StateField;
     private JButton SaveState;
-    private JTextField SavedPC;
     private JButton LoadState;
     private JButton SetNormal;
-    private JComboBox Instruction;
-    private JTextField Argument;
     private JButton Reset;
     private JButton Add;
     private JButton POP;
-    private JTextField SavedA;
-    private JTextField SavedState;
     private JButton saveFile;
     private JButton loadFile;
-
-    public CPU cpu = new CPU(8);
-    public Registers reg;
+    private JTextField PCField;
+    private JTextField AccumulatorField;
+    private JTextField StateField;
+    private JTextField SavedPC;
+    private JTextField Argument;
+    private JTextField SavedA;
+    private JTextField SavedState;
+    private JTextField currentInstruction;
 
     private JPanel mainPanel;
     private JPanel buttonPanel;
     private JPanel regPanel;
     private JPanel instPanel;
     private JPanel filePanel;
-    private JTextField currentInstruction;
+    private JFormattedTextField MemoryField;
+    private JTextArea InstructionsField;
+    private JComboBox<String> Instruction;
+    private JLabel ArgLabel;
+    private JLabel InstructionField;
+    private JLabel InputLabel;
+    private JTextField textField1;
+    private JTextField LoadFileField;
+    private JTextField SaveFileField;
 
-    public Interface() {
+    private final CPU cpu;
+    public Registers reg;
+
+    private void updateMemory() {
+        MemoryField.setText(Arrays.toString(cpu.getMemory()));
+        InstructionsField.setText(cpu.getInstructions());
+        currentInstruction.setText("Instruction: " + cpu.getInstructionStr(cpu.getPC()));
+    }
+    private void updateText() {
+        PCField.setText("PC: " + cpu.getPC());
+        AccumulatorField.setText("Accumulator: " + cpu.getAccumulator());
+        StateField.setText("State: " + cpu.getState().toString());
+    }
+
+    public Interface(CPU cpu) {
+        super();
+
+        this.cpu = cpu;
 
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+        Dimension dimension = new Dimension(680,230);
+        mainPanel.setMinimumSize(dimension);
+        mainPanel.setPreferredSize(dimension);
+        mainPanel.setMaximumSize(dimension);
+
         this.setContentPane(mainPanel);
-        //this.setResizable(false);
+        this.setResizable(false);
         this.setVisible(true);
         this.pack();
 
-        cpu.loadFile("filename.txt");
+        for(enumCommands v : enumCommands.values()) {
+            Instruction.addItem(v.toString());
+        }
 
-        MemoryField.setText(Arrays.toString(cpu.getMemory()));
-        InstructionsField.setText(cpu.getInstructions());
-        currentInstruction.setText("Current Instruction: " + cpu.getInstructionStr());
+        updateMemory();
+        updateText();
 
         RunAll.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
                 cpu.executeAll();
-                MemoryField.setText(Arrays.toString(cpu.getMemory()));
-                currentInstruction.setText("Current Instruction: " + cpu.getInstructionStr());
+                updateMemory();
+                updateText();
             }
         });
         Run.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
                 cpu.execute();
-                MemoryField.setText(Arrays.toString(cpu.getMemory()));
-                currentInstruction.setText("Current Instruction: " + cpu.getInstructionStr());
+                updateMemory();
+                updateText();
             }
         });
         SaveState.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
                 reg = cpu.getRegisters();
+                SavedPC.setText("PC: " + cpu.getPC());
+                SavedA.setText("Accumulator: " + cpu.getAccumulator());
+                SavedState.setText("State: " + cpu.getState().toString());
             }
         });
         LoadState.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-                if (reg != null)
+                if (reg != null) {
                     cpu.setRegister(reg);
+                    updateText();
+                }
             }
         });
         SetNormal.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
                 cpu.setCpuStopToNormal();
+                updateText();
+            }
+        });
+
+        Reset.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                cpu.clearInstructions();
+                updateMemory();
+                updateText();
+            }
+        });
+        Add.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                cpu.insertInstruction(Instruction.getSelectedItem() + " " + Argument.getText());
+                updateMemory();
+            }
+        });
+        POP.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                cpu.popInstruction();
+                updateMemory();
+                PCField.setText("PC: " + cpu.getPC());
+            }
+        });
+        loadFile.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                JOptionPane.showMessageDialog(null, cpu.loadFile(LoadFileField.getText()));
+                updateText();
+                updateMemory();
+            }
+        });
+        saveFile.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                JOptionPane.showMessageDialog(null, cpu.saveFile(SaveFileField.getText()));
             }
         });
     }

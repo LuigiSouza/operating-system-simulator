@@ -8,6 +8,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Scanner;
 
@@ -33,14 +34,14 @@ public class CPU extends cpuBasic {
 
     public CPU (int i) {
         this.PC = 0;
-        this.cpuStop = enumState.Normal;
+        this.cpuStop = enumState.Normal.getState();
         this.Accumulator = 0;
         this.memory = new int[i];
     }
 
     public CPU () {
         this.PC = 0;
-        this.cpuStop = enumState.Normal;
+        this.cpuStop = enumState.Normal.getState();
         this.Accumulator = 0;
     }
 
@@ -62,8 +63,8 @@ public class CPU extends cpuBasic {
     }
 
     public void setCpuStopToNormal() {
-        if ( cpuStop.getState() != enumState.Normal.getState() ) {
-            this.cpuStop.setState(enumState.Normal.getState());
+        if ( cpuStop != enumState.Normal.getState() ) {
+            this.cpuStop = enumState.Normal.getState();
             PC++;
         }
     }
@@ -76,8 +77,8 @@ public class CPU extends cpuBasic {
             return new Tuple<>(enumCommands.ERROR.getCommand(), null);
     }
 
-    public String getInstructionStr() {
-        Tuple<Integer, Integer> tpl = getInstruction(this.PC);
+    public String getInstructionStr(int i) {
+        Tuple<Integer, Integer> tpl = getInstruction(i);
 
         if(tpl.getY() != null)
             return "" + enumCommands.values()[tpl.getX()] + " " + tpl.getY();
@@ -89,7 +90,23 @@ public class CPU extends cpuBasic {
         this.insertInstruction(myString);
     }
 
-    public void loadFile(String str) {
+    public String saveFile(String str) {
+        try {
+            FileWriter myWriter = new FileWriter(str);
+            for (int i = 0; i < getSizeProgram(); i++) {
+                myWriter.write(getInstructionStr(i) + "\n");
+            }
+            myWriter.close();
+
+            return "File " + str + " created.";
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            return "An error occurred.";
+        }
+    }
+
+    public String loadFile(String str) {
         try {
             File myObj = new File(str);
             Scanner myReader = new Scanner(myObj);
@@ -98,9 +115,11 @@ public class CPU extends cpuBasic {
                 this.insertInstruction(data);
             }
             myReader.close();
+
+            return "File " + str + " loaded.";
         } catch (FileNotFoundException e) {
-            System.out.println("An error occurred.");
             e.printStackTrace();
+            return "An error occurred.";
         }
     }
 
@@ -139,13 +158,7 @@ public class CPU extends cpuBasic {
         return new Registers(getPC(), getAccumulator(), cpuStop);
     }
 
-    public void setCpuStop(int i) {
-        cpuStop.setState(i);
-    }
-
-    public boolean isCpuStop() {
-        return cpuStop.getState() != 0;
-    }
+    public enumState getState() { return enumState.values()[cpuStop]; }
 
     public void executeAll() {
         while( !this.isCpuStop() ) {

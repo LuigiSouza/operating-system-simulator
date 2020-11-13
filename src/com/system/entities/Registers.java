@@ -5,15 +5,15 @@ import com.system.handlers.enumState;
 public class Registers {
     private int PC;
     private int Accumulator;
-    private enumState State;
+    private int State;
 
-    public Registers(int pc,int A, enumState state) {
+    public Registers(int pc,int A, int state) {
         this.PC = pc;
         this.Accumulator = A;
         this.State = state;
     }
 
-    public enumState getState() {
+    public int getState() {
         return State;
     }
 
@@ -25,7 +25,7 @@ public class Registers {
         return PC;
     }
 
-    public void setState(enumState state) {
+    public void setState(int state) {
         State = state;
     }
 

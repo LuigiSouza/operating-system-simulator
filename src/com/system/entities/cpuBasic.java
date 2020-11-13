@@ -4,6 +4,7 @@ import com.system.handlers.Tuple;
 import com.system.handlers.enumCommands;
 import com.system.handlers.enumState;
 
+import javax.swing.plaf.synth.SynthSpinnerUI;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -14,7 +15,7 @@ public class cpuBasic {
     protected int PC;
     protected int Accumulator;
 
-    protected enumState cpuStop;
+    protected int cpuStop;
 
     protected int[] memory;
     private int sizeProgram;
@@ -46,6 +47,7 @@ public class cpuBasic {
 
         String cmd = parsed[0];
         enumCommands myEnum = tryEnum(cmd);
+        //System.out.println(cmd + ", got: " + myEnum);
 
         if (parsed.length > 1)
             memoryInstructions.add(new Tuple<>(myEnum.getCommand(), Integer.parseInt(parsed[1])));
@@ -116,7 +118,8 @@ public class cpuBasic {
     }
 
     private void PARA() {
-        cpuStop.setState(enumState.Stop.getState());
+        cpuStop = enumState.Stop.getState();
+        PC--;
     }
     private void LE() {
         throwError(enumState.Read.getState());
@@ -164,29 +167,19 @@ public class cpuBasic {
     }
 
     private void throwError(int i) {
+        cpuStop = i;
+    }
 
-        cpuStop.setState(i);
-
-        /*
-        try {
-            FileWriter myWriter = new FileWriter("filename.txt");
-
-            myWriter.write("PC: " + PC + "\n");
-            myWriter.write("Accumulator: " + Accumulator + "\n");
-            myWriter.write("Memory: " + Arrays.toString(memory) + "\n");
-
-            myWriter.close();
-
-            throw new RuntimeException(
-                    "Invalid instruction, error in command line on PC: " + PC + ". Error_log created.");
-
-        } catch (IOException e) {
-            System.out.println("Invalid instruction, error in command line on PC: " + PC + ". Error_log not created.");
-            e.printStackTrace();
-        }*/
+    private boolean hasArgument(int i) {
+        if (i == 6 || i == 8 || i == 9 || i == 10)
+            return false;
+        return true;
     }
 
     public void execute() {
+        if(isCpuStop())
+            return;
+
         Tuple<Integer, Integer> aux;
         if (PC < memoryInstructions.size())
             aux = memoryInstructions.get(PC);
@@ -197,34 +190,55 @@ public class cpuBasic {
         int i = aux.getX();
         Object n = aux.getY();
 
-        if(i == 6 && n != null || i != 6 && n == null) {
+        if(!hasArgument(i) && n != null || hasArgument(i) && n == null) {
             throwError(enumState.InvalidInstructions.getState());
             return;
         }
         PC++;
         getInstruction[i].execute(n);
 
-        System.out.println("value Pc: " + PC + ", instruction type: " + enumCommands.values()[i] + ", A: " + Accumulator/*+ ", memory: " + Arrays.toString(memory)*/);
+        //System.out.println("value Pc: " + PC + ", instruction type: " + enumCommands.values()[i] + ", A: " + Accumulator/*+ ", memory: " + Arrays.toString(memory)*/);
     }
 
-    public void popInstruction() { memoryInstructions.remove(memoryInstructions.get(memoryInstructions.size()-1)); }
+    public void popInstruction() {
+        memoryInstructions.remove(memoryInstructions.get(memoryInstructions.size()-1));
+        setSizeProgram();
+        if(PC >= getSizeProgram())
+            PC--;
+    }
 
-    public void clearInstructions() { memoryInstructions.clear(); }
+    public void clearInstructions() {
+        memoryInstructions.clear();
+        setSizeProgram();
 
-    protected int getSizeProgram () { return sizeProgram; }
+        PC = 0;
+        Accumulator=0;
+        setCpuStop(enumState.Normal.getState());
+    }
+
+    protected int getSizeProgram() { return sizeProgram; }
 
     protected void setSizeProgram() { sizeProgram = memoryInstructions.size(); }
 
     public String getInstructions() {
         StringBuilder ret = new StringBuilder("");
+        int i = 0;
         for(Tuple<Integer, Integer> v : memoryInstructions){
-            ret.append(enumCommands.values()[v.getX()]).append(" ");
+            ret.append(i).append(": ").append(enumCommands.values()[v.getX()]).append(" ");
             if (v.getY() == null)
                 ret.append('\n');
             else
                 ret.append(v.getY()).append('\n');
+            i++;
         }
         return ret.toString();
     }
 
+    public void setCpuStop(int i) {
+        cpuStop = i;
+    }
+
+    public boolean isCpuStop() {
+        return cpuStop != enumState.Normal.getState();
+    }
 }
