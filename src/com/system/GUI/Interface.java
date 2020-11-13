@@ -42,6 +42,7 @@ public class Interface extends JFrame {
     private JTextField InputField;
     private JTextField LoadFileField;
     private JTextField SaveFileField;
+    private JButton ResetMemory;
 
     private final CPU cpu;
     public Registers reg;
@@ -172,6 +173,13 @@ public class Interface extends JFrame {
                     Argument.setEditable(false);
                     Argument.setText("");
                 }
+            }
+        });
+        ResetMemory.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                cpu.resetMemory();
+                MemoryField.setText(Arrays.toString(cpu.getMemory()));
             }
         });
     }

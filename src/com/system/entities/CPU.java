@@ -135,6 +135,10 @@ public class CPU extends cpuBasic {
         this.memory = i;
     }
 
+    public void resetMemory() {
+        Arrays.fill(this.memory, 0);
+    }
+
     public int[] getMemory() {
         return memory;
     }
