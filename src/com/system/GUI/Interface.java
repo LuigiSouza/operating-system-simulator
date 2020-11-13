@@ -9,6 +9,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Arrays;
+import java.util.Objects;
 
 public class Interface extends JFrame {
     private JButton RunAll;
@@ -158,6 +159,19 @@ public class Interface extends JFrame {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
                 JOptionPane.showMessageDialog(null, cpu.saveFile(SaveFileField.getText()));
+            }
+        });
+        Instruction.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                enumCommands aux = Enum.valueOf(enumCommands.class, Objects.requireNonNull(Instruction.getSelectedItem()).toString());
+                if(cpu.hasArgument(aux.getCommand())) {
+                    Argument.setEditable(true);
+                }
+                else {
+                    Argument.setEditable(false);
+                    Argument.setText("");
+                }
             }
         });
     }

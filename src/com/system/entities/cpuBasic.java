@@ -140,7 +140,7 @@ public class cpuBasic {
             n -> ERROR(),
     };
 
-    private boolean hasArgument(int i) {
+    public boolean hasArgument(int i) {
         return i != 6 && i != 8 && i != 9 && i != 10;
     }
 
