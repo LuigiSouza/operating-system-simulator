@@ -1,6 +1,6 @@
-package com.company.entities;
+package com.system.entities;
 
-import com.company.handlers.enumState;
+import com.system.handlers.enumState;
 
 public class Registers {
     private int PC;

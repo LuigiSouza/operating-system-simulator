@@ -1,18 +1,19 @@
-package com.company;
+package com.system;
 
-import com.company.entities.CPU;
-import com.company.entities.cpuBasic;
+import com.system.GUI.Interface;
+import com.system.entities.CPU;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.util.Scanner;
+import javax.swing.*;
 
 public class Main {
 
     public static void main(String[] args) {
 
+        JFrame frame = new Interface();
+
+        /*
         CPU cpu = new CPU(128);
-        /*String[] myString = new String[];= {
+        String[] myString = new String[];= {
             "CARGI 10",
             "ARMM 2",
             "CARGI 32",
@@ -20,11 +21,11 @@ public class Main {
             "ARMM 0",
             "NEG",
             "PARA"
-        };*/
+        };
         cpu.loadFile("filename.txt");
 
         cpu.executeAll();
-        cpu.creteLog("text_log.txt");
+        cpu.creteLog("text_log.txt"); */
 	    // write your code here
     }
 }

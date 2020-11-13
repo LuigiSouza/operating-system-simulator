@@ -1,4 +1,4 @@
-package com.company.handlers;
+package com.system.handlers;
 
 public enum enumCommands {
     CARGI(0),
@@ -9,7 +9,10 @@ public enum enumCommands {
     SOMA(5),
     NEG(6),
     DESVZ(7),
-    ERROR(8);
+    PARA(8),
+    LE(9),
+    GRAVA(10),
+    ERROR(11);
 
     private final int command;
 

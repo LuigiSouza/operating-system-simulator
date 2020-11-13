@@ -1,9 +1,10 @@
-package com.company.entities;
+package com.system.entities;
 
-import com.company.handlers.Tuple;
-import com.company.handlers.enumCommands;
-import com.company.handlers.enumState;
+import com.system.handlers.Tuple;
+import com.system.handlers.enumCommands;
+import com.system.handlers.enumState;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Vector;
@@ -51,6 +52,7 @@ public class cpuBasic {
         else
             memoryInstructions.add(new Tuple<>(myEnum.getCommand(), null));
 
+        setSizeProgram();
     }
 
     protected Tuple<Integer, Integer> getInstruction(int PC) {
@@ -112,6 +114,14 @@ public class cpuBasic {
             PC = n;
         }
     }
+
+    private void PARA() {
+        cpuStop.setState(enumState.Stop.getState());
+    }
+    private void LE() {
+        throwError(enumState.Read.getState());
+    }
+    private void GRAVA() { throwError(enumState.Save.getState()); }
     private void ERROR() {
         throwError(enumState.InvalidInstructions.getState());
     }
@@ -129,6 +139,9 @@ public class cpuBasic {
             n -> SOMA((int) n),
             n -> NEG(),
             n -> DESVZ((int) n),
+            n -> PARA(),
+            n -> LE(),
+            n -> GRAVA(),
             n -> ERROR(),
     };
 
@@ -174,7 +187,13 @@ public class cpuBasic {
     }
 
     public void execute() {
-        Tuple<Integer, Integer> aux = memoryInstructions.get(PC);
+        Tuple<Integer, Integer> aux;
+        if (PC < memoryInstructions.size())
+            aux = memoryInstructions.get(PC);
+        else {
+            throwError(enumState.InvalidInstructions.getState());
+            return;
+        }
         int i = aux.getX();
         Object n = aux.getY();
 
@@ -185,13 +204,27 @@ public class cpuBasic {
         PC++;
         getInstruction[i].execute(n);
 
-        System.out.println("value Pc: " + PC + ", instruction type: " + enumCommands.values()[i] + ", A: " + Accumulator+ ", memory: " + Arrays.toString(memory));
+        System.out.println("value Pc: " + PC + ", instruction type: " + enumCommands.values()[i] + ", A: " + Accumulator/*+ ", memory: " + Arrays.toString(memory)*/);
     }
+
+    public void popInstruction() { memoryInstructions.remove(memoryInstructions.get(memoryInstructions.size()-1)); }
 
     public void clearInstructions() { memoryInstructions.clear(); }
 
     protected int getSizeProgram () { return sizeProgram; }
 
     protected void setSizeProgram() { sizeProgram = memoryInstructions.size(); }
+
+    public String getInstructions() {
+        StringBuilder ret = new StringBuilder("");
+        for(Tuple<Integer, Integer> v : memoryInstructions){
+            ret.append(enumCommands.values()[v.getX()]).append(" ");
+            if (v.getY() == null)
+                ret.append('\n');
+            else
+                ret.append(v.getY()).append('\n');
+        }
+        return ret.toString();
+    }
 
 }

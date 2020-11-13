@@ -1,8 +1,8 @@
-package com.company.entities;
+package com.system.entities;
 
-import com.company.handlers.Tuple;
-import com.company.handlers.enumCommands;
-import com.company.handlers.enumState;
+import com.system.handlers.Tuple;
+import com.system.handlers.enumCommands;
+import com.system.handlers.enumState;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -62,8 +62,8 @@ public class CPU extends cpuBasic {
     }
 
     public void setCpuStopToNormal() {
-        if ( cpuStop.getState() != 0 ) {
-            this.cpuStop.setState(0);
+        if ( cpuStop.getState() != enumState.Normal.getState() ) {
+            this.cpuStop.setState(enumState.Normal.getState());
             PC++;
         }
     }
@@ -74,6 +74,14 @@ public class CPU extends cpuBasic {
             return super.getInstruction(PC);
         else
             return new Tuple<>(enumCommands.ERROR.getCommand(), null);
+    }
+
+    public String getInstructionStr() {
+        Tuple<Integer, Integer> tpl = getInstruction(this.PC);
+
+        if(tpl.getY() != null)
+            return "" + enumCommands.values()[tpl.getX()] + " " + tpl.getY();
+        return "" + enumCommands.values()[tpl.getX()];
     }
 
     public void resetInstructions(String[] myString) {
