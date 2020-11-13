@@ -4,10 +4,7 @@ import com.system.handlers.Tuple;
 import com.system.handlers.enumCommands;
 import com.system.handlers.enumState;
 
-import javax.swing.plaf.synth.SynthSpinnerUI;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Vector;
 
 public class cpuBasic {
@@ -26,14 +23,7 @@ public class cpuBasic {
      */
     private final ArrayList<Tuple<Integer, Integer>> memoryInstructions = new ArrayList<>();
 
-    private enumCommands tryEnum (String myString) {
-        try {
-            return Enum.valueOf(enumCommands.class, myString);
-        } catch (IllegalArgumentException e) {
-            // log error or something here
-            return Enum.valueOf(enumCommands.class, "ERROR");
-        }
-    }
+
     public void insertInstruction(String[] myString) {
         for(String v : myString)
             insertInstruction(v);
@@ -58,7 +48,6 @@ public class cpuBasic {
     }
 
     protected Tuple<Integer, Integer> getInstruction(int PC) {
-
         if (PC < getSizeProgram())
             return memoryInstructions.get(PC);
         else {
@@ -66,6 +55,8 @@ public class cpuBasic {
             return new Tuple<>(enumCommands.ERROR.getCommand(), null);
         }
     }
+
+    // Instructions function
 
     private void CARGI(int n) {
         Accumulator = n;
@@ -116,7 +107,6 @@ public class cpuBasic {
             PC = n;
         }
     }
-
     private void PARA() {
         cpuStop = enumState.Stop.getState();
         PC--;
@@ -124,7 +114,9 @@ public class cpuBasic {
     private void LE() {
         throwError(enumState.Read.getState());
     }
-    private void GRAVA() { throwError(enumState.Save.getState()); }
+    private void GRAVA() {
+        throwError(enumState.Save.getState());
+    }
     private void ERROR() {
         throwError(enumState.InvalidInstructions.getState());
     }
@@ -148,32 +140,8 @@ public class cpuBasic {
             n -> ERROR(),
     };
 
-    public static String[] mySplit(String str, String regex)
-    {
-        Vector<String> result = new Vector<>();
-        int start = 0;
-        int pos = str.indexOf(regex);
-        while (pos>=start) {
-            if (pos>start) {
-                result.add(str.substring(start,pos));
-            }
-            start = pos + regex.length();
-            pos = str.indexOf(regex,start);
-        }
-        if (start<str.length()) {
-            result.add(str.substring(start));
-        }
-        return result.toArray(new String[0]);
-    }
-
-    private void throwError(int i) {
-        cpuStop = i;
-    }
-
     private boolean hasArgument(int i) {
-        if (i == 6 || i == 8 || i == 9 || i == 10)
-            return false;
-        return true;
+        return i != 6 && i != 8 && i != 9 && i != 10;
     }
 
     public void execute() {
@@ -220,8 +188,8 @@ public class cpuBasic {
 
     protected void setSizeProgram() { sizeProgram = memoryInstructions.size(); }
 
-    public String getInstructions() {
-        StringBuilder ret = new StringBuilder("");
+    public String getInstructionsToString() {
+        StringBuilder ret = new StringBuilder();
         int i = 0;
         for(Tuple<Integer, Integer> v : memoryInstructions){
             ret.append(i).append(": ").append(enumCommands.values()[v.getX()]).append(" ");
@@ -234,11 +202,39 @@ public class cpuBasic {
         return ret.toString();
     }
 
+    private void throwError(int i) {
+        cpuStop = i;
+    }
+
     public void setCpuStop(int i) {
         cpuStop = i;
     }
 
-    public boolean isCpuStop() {
-        return cpuStop != enumState.Normal.getState();
+    public boolean isCpuStop() { return cpuStop != enumState.Normal.getState(); }
+
+    private static String[] mySplit(String str, String regex) {
+        Vector<String> result = new Vector<>();
+        int start = 0;
+        int pos = str.indexOf(regex);
+        while (pos>=start) {
+            if (pos>start) {
+                result.add(str.substring(start,pos));
+            }
+            start = pos + regex.length();
+            pos = str.indexOf(regex,start);
+        }
+        if (start<str.length()) {
+            result.add(str.substring(start));
+        }
+        return result.toArray(new String[0]);
+    }
+
+    private enumCommands tryEnum (String myString) {
+        try {
+            return Enum.valueOf(enumCommands.class, myString);
+        } catch (IllegalArgumentException e) {
+            // log error or something here
+            return Enum.valueOf(enumCommands.class, "ERROR");
+        }
     }
 }

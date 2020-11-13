@@ -5,15 +5,9 @@ import com.system.entities.Registers;
 import com.system.handlers.enumCommands;
 
 import javax.swing.*;
-import javax.swing.text.NumberFormatter;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
-import java.io.IOException;
-import java.net.URI;
-import java.text.NumberFormat;
 import java.util.Arrays;
 
 public class Interface extends JFrame {
@@ -44,10 +38,7 @@ public class Interface extends JFrame {
     private JFormattedTextField MemoryField;
     private JTextArea InstructionsField;
     private JComboBox<String> Instruction;
-    private JLabel ArgLabel;
-    private JLabel InstructionField;
-    private JLabel InputLabel;
-    private JTextField textField1;
+    private JTextField InputField;
     private JTextField LoadFileField;
     private JTextField SaveFileField;
 
@@ -56,8 +47,8 @@ public class Interface extends JFrame {
 
     private void updateMemory() {
         MemoryField.setText(Arrays.toString(cpu.getMemory()));
-        InstructionsField.setText(cpu.getInstructions());
-        currentInstruction.setText("Instruction: " + cpu.getInstructionStr(cpu.getPC()));
+        InstructionsField.setText(cpu.getInstructionsToString());
+        currentInstruction.setText("Instruction: " + cpu.getInstructionToString(cpu.getPC()));
     }
     private void updateText() {
         PCField.setText("PC: " + cpu.getPC());
@@ -128,6 +119,7 @@ public class Interface extends JFrame {
             public void actionPerformed(ActionEvent actionEvent) {
                 cpu.setCpuStopToNormal();
                 updateText();
+                currentInstruction.setText("Instruction: " + cpu.getInstructionToString(cpu.getPC()));
             }
         });
 

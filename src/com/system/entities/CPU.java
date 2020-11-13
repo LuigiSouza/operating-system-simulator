@@ -8,7 +8,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Scanner;
 
@@ -77,7 +76,7 @@ public class CPU extends cpuBasic {
             return new Tuple<>(enumCommands.ERROR.getCommand(), null);
     }
 
-    public String getInstructionStr(int i) {
+    public String getInstructionToString(int i) {
         Tuple<Integer, Integer> tpl = getInstruction(i);
 
         if(tpl.getY() != null)
@@ -94,7 +93,7 @@ public class CPU extends cpuBasic {
         try {
             FileWriter myWriter = new FileWriter(str);
             for (int i = 0; i < getSizeProgram(); i++) {
-                myWriter.write(getInstructionStr(i) + "\n");
+                myWriter.write(getInstructionToString(i) + "\n");
             }
             myWriter.close();
 
