@@ -25,6 +25,11 @@ import java.util.Scanner;
  */
 public class CPU extends cpuBasic {
 
+    private int PC;
+    private int Accumulator;
+    private enumState cpuStop;
+    private int[] memory;
+
     public CPU (Registers reg) {
         this.PC = reg.getPC();
         this.cpuStop = reg.getState();
@@ -33,14 +38,14 @@ public class CPU extends cpuBasic {
 
     public CPU (int i) {
         this.PC = 0;
-        this.cpuStop = enumState.Normal.getState();
+        this.cpuStop = enumState.Normal;
         this.Accumulator = 0;
         this.memory = new int[i];
     }
 
     public CPU () {
         this.PC = 0;
-        this.cpuStop = enumState.Normal.getState();
+        this.cpuStop = enumState.Normal;
         this.Accumulator = 0;
     }
 
@@ -62,9 +67,10 @@ public class CPU extends cpuBasic {
     }
 
     public void setCpuStopToNormal() {
-        if ( cpuStop != enumState.Normal.getState() ) {
-            this.cpuStop = enumState.Normal.getState();
-            PC++;
+        if ( cpuStop != enumState.Normal ) {
+            if(this.cpuStop == enumState.Read || this.cpuStop == enumState.Save)
+                PC++;
+            this.cpuStop = enumState.Normal;
         }
     }
 
@@ -157,15 +163,19 @@ public class CPU extends cpuBasic {
         this.cpuStop = reg.getState();
     }
 
+    public void setAccumulator(int i) { this.Accumulator = i; }
+
     public Registers getRegisters() {
         return new Registers(getPC(), getAccumulator(), cpuStop);
     }
 
-    public enumState getState() { return enumState.values()[cpuStop]; }
+    public enumState getState() { return cpuStop; }
 
-    public void executeAll() {
-        while( !this.isCpuStop() ) {
+    public enumState executeAll() {
+        while( !this.isCpuStop() && SO.timer.isInterruption(SO.timer.getTimer()) == null) {
             this.execute();
+            SO.timer.addTimer();
         }
+        return getState();
     }
 }

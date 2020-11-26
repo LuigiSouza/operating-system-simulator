@@ -12,7 +12,8 @@ public class cpuBasic {
     protected int PC;
     protected int Accumulator;
 
-    protected int cpuStop;
+
+    protected enumState cpuStop;
 
     protected int[] memory;
     private int sizeProgram;
@@ -33,7 +34,7 @@ public class cpuBasic {
         String[] parsed = mySplit(myString, " ");
 
         if (parsed.length > 2)
-            throwError(enumState.InvalidInstructions.getState());
+            setCpuStop(enumState.InvalidInstructions);
 
         String cmd = parsed[0];
         enumCommands myEnum = tryEnum(cmd);
@@ -65,7 +66,7 @@ public class cpuBasic {
         if(n < memory.length)
             Accumulator = memory[n];
         else
-            throwError(2);
+            setCpuStop(enumState.InvalidMemory);
     }
     private void CARGX(int n) {
         if(n < memory.length) {
@@ -75,13 +76,13 @@ public class cpuBasic {
                 return;
             }
         }
-        throwError(2);
+        setCpuStop(enumState.InvalidMemory);
     }
     private void ARMM(int n) {
         if(n < memory.length)
             memory[n] = Accumulator;
         else
-            throwError(2);
+            setCpuStop(enumState.InvalidMemory);
     }
     private void ARMX(int n) {
         if(n < memory.length) {
@@ -91,13 +92,13 @@ public class cpuBasic {
                 return;
             }
         }
-        throwError(2);
+        setCpuStop(enumState.InvalidMemory);
     }
     private void SOMA(int n) {
         if(n < memory.length)
             Accumulator += memory[n];
         else
-            throwError(2);
+            setCpuStop(enumState.InvalidMemory);
     }
     private void NEG() {
         Accumulator *= -1;
@@ -108,17 +109,17 @@ public class cpuBasic {
         }
     }
     private void PARA() {
-        cpuStop = enumState.Stop.getState();
-        PC--;
+        setCpuStop(enumState.Stop);
     }
-    private void LE() {
-        throwError(enumState.Read.getState());
+    private void LE(int n) {
+        setCpuStop(enumState.Read);
     }
-    private void GRAVA() {
-        throwError(enumState.Save.getState());
+    private void GRAVA(int n) {
+        setCpuStop(enumState.Save);
     }
     private void ERROR() {
-        throwError(enumState.InvalidInstructions.getState());
+        setCpuStop(enumState.InvalidInstructions);
+        PC--;
     }
 
     private interface instruction {
@@ -135,12 +136,12 @@ public class cpuBasic {
             n -> NEG(),
             n -> DESVZ((int) n),
             n -> PARA(),
-            n -> LE(),
-            n -> GRAVA(),
+            n -> LE((int) n),
+            n -> GRAVA((int) n),
             n -> ERROR(),
     };
 
-    public boolean hasArgument(int i) {
+    public static boolean hasArgument(int i) {
         return i != 6 && i != 8 && i != 9 && i != 10;
     }
 
@@ -152,14 +153,14 @@ public class cpuBasic {
         if (PC < memoryInstructions.size())
             aux = memoryInstructions.get(PC);
         else {
-            throwError(enumState.InvalidInstructions.getState());
+            setCpuStop(enumState.InvalidInstructions);
             return;
         }
         int i = aux.getX();
         Object n = aux.getY();
 
         if(!hasArgument(i) && n != null || hasArgument(i) && n == null) {
-            throwError(enumState.InvalidInstructions.getState());
+            setCpuStop(enumState.InvalidInstructions);
             return;
         }
         PC++;
@@ -183,7 +184,7 @@ public class cpuBasic {
 
         PC = 0;
         Accumulator=0;
-        setCpuStop(enumState.Normal.getState());
+        setCpuStop(enumState.Normal);
     }
 
     protected int getSizeProgram() { return sizeProgram; }
@@ -204,15 +205,11 @@ public class cpuBasic {
         return ret.toString();
     }
 
-    private void throwError(int i) {
+    public void setCpuStop(enumState i) {
         cpuStop = i;
     }
 
-    public void setCpuStop(int i) {
-        cpuStop = i;
-    }
-
-    public boolean isCpuStop() { return cpuStop != enumState.Normal.getState(); }
+    public boolean isCpuStop() { return cpuStop != enumState.Normal; }
 
     private static String[] mySplit(String str, String regex) {
         Vector<String> result = new Vector<>();

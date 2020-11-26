@@ -2,12 +2,16 @@ package com.system.GUI;
 
 import com.system.entities.CPU;
 import com.system.entities.Registers;
+import com.system.entities.SO;
 import com.system.handlers.enumCommands;
+import com.system.handlers.enumState;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.util.Arrays;
 import java.util.Objects;
 
@@ -32,18 +36,18 @@ public class Interface extends JFrame {
     private JTextField currentInstruction;
 
     private JPanel mainPanel;
-    private JPanel buttonPanel;
-    private JPanel regPanel;
-    private JPanel instPanel;
-    private JPanel filePanel;
     private JFormattedTextField MemoryField;
     private JTextArea InstructionsField;
     private JComboBox<String> Instruction;
-    private JTextField InputField;
+    private JTextField InputFieldFile;
     private JTextField LoadFileField;
     private JTextField SaveFileField;
     private JButton ResetMemory;
+    private JButton loadIOFile;
+    private JButton loadIO;
+    private JTextField InputValue;
 
+    private final SO system;
     private final CPU cpu;
     public Registers reg;
 
@@ -61,11 +65,12 @@ public class Interface extends JFrame {
     public Interface(CPU cpu) {
         super();
 
-        this.cpu = cpu;
+        this.system = new SO(8);
+        this.cpu = system.getCpu();
 
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-        Dimension dimension = new Dimension(680,230);
+        Dimension dimension = new Dimension(800,240);
         mainPanel.setMinimumSize(dimension);
         mainPanel.setPreferredSize(dimension);
         mainPanel.setMaximumSize(dimension);
@@ -86,6 +91,9 @@ public class Interface extends JFrame {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
                 cpu.executeAll();
+                if(cpu.getState() == enumState.Stop) {
+                    JOptionPane.showMessageDialog(null, "Program Terminated!");
+                }
                 updateMemory();
                 updateText();
             }
@@ -94,6 +102,9 @@ public class Interface extends JFrame {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
                 cpu.execute();
+                if(cpu.getState() == enumState.Stop) {
+                    JOptionPane.showMessageDialog(null, "Program Terminated!");
+                }
                 updateMemory();
                 updateText();
             }
@@ -180,6 +191,14 @@ public class Interface extends JFrame {
             public void actionPerformed(ActionEvent actionEvent) {
                 cpu.resetMemory();
                 MemoryField.setText(Arrays.toString(cpu.getMemory()));
+            }
+        });
+        addWindowListener(new WindowAdapter()
+        {
+            @Override
+            public void windowClosing(WindowEvent e)
+            {
+                e.getWindow().dispose();
             }
         });
     }
