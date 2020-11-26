@@ -57,7 +57,7 @@ public class cpuBasic {
         }
     }
 
-    // Instructions function
+    // Instructions function -------------------------------------
 
     private void CARGI(int n) {
         Accumulator = n;
@@ -141,6 +141,9 @@ public class cpuBasic {
             n -> ERROR(),
     };
 
+    // Instructions function -------------------------------------
+
+    // Sees if an instruction has mandatory argument
     public static boolean hasArgument(int i) {
         return i != 6 && i != 8 && i != 9 && i != 10;
     }
@@ -166,7 +169,6 @@ public class cpuBasic {
         PC++;
         getInstruction[i].execute(n);
 
-        //System.out.println("value Pc: " + PC + ", instruction type: " + enumCommands.values()[i] + ", A: " + Accumulator/*+ ", memory: " + Arrays.toString(memory)*/);
     }
 
     public void popInstruction() {
@@ -191,6 +193,7 @@ public class cpuBasic {
 
     protected void setSizeProgram() { sizeProgram = memoryInstructions.size(); }
 
+    // Returns all instructions into String format
     public String getInstructionsToString() {
         StringBuilder ret = new StringBuilder();
         int i = 0;

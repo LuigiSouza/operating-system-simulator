@@ -25,17 +25,14 @@ import java.util.Scanner;
  */
 public class CPU extends cpuBasic {
 
-    private int PC;
-    private int Accumulator;
-    private enumState cpuStop;
-    private int[] memory;
-
+    // Setup empty CPU based on register
     public CPU (Registers reg) {
         this.PC = reg.getPC();
         this.cpuStop = reg.getState();
         this.Accumulator = reg.getAccumulator();
     }
 
+    // Setup CPU with memory allocated
     public CPU (int i) {
         this.PC = 0;
         this.cpuStop = enumState.Normal;
@@ -43,12 +40,14 @@ public class CPU extends cpuBasic {
         this.memory = new int[i];
     }
 
+    // Starts a full empty CPU
     public CPU () {
         this.PC = 0;
         this.cpuStop = enumState.Normal;
         this.Accumulator = 0;
     }
 
+    // Save register into a file
     public void creteLog(String file) {
         try {
 
@@ -66,6 +65,7 @@ public class CPU extends cpuBasic {
         }
     }
 
+    // Set CPU state back to normal, in case was a normal interruption, increment PC
     public void setCpuStopToNormal() {
         if ( cpuStop != enumState.Normal ) {
             if(this.cpuStop == enumState.Read || this.cpuStop == enumState.Save)
@@ -81,7 +81,7 @@ public class CPU extends cpuBasic {
         else
             return new Tuple<>(enumCommands.ERROR.getCommand(), null);
     }
-
+    // Return String of an i instruction
     public String getInstructionToString(int i) {
         Tuple<Integer, Integer> tpl = getInstruction(i);
 
@@ -90,11 +90,13 @@ public class CPU extends cpuBasic {
         return "" + enumCommands.values()[tpl.getX()];
     }
 
+    // Clear instructions Array and creates a new one
     public void resetInstructions(String[] myString) {
         super.clearInstructions();
         this.insertInstruction(myString);
     }
 
+    // Save instructions into a file
     public String saveFile(String str) {
         try {
             FileWriter myWriter = new FileWriter(str);
@@ -110,7 +112,7 @@ public class CPU extends cpuBasic {
             return "An error occurred.";
         }
     }
-
+    // Load instructions from a file
     public String loadFile(String str) {
         try {
             File myObj = new File(str);
@@ -153,6 +155,8 @@ public class CPU extends cpuBasic {
         return Accumulator;
     }
 
+    public void setAccumulator(int i) { this.Accumulator = i; }
+
     public int getPC() {
         return PC;
     }
@@ -162,8 +166,6 @@ public class CPU extends cpuBasic {
         this.Accumulator = reg.getAccumulator();
         this.cpuStop = reg.getState();
     }
-
-    public void setAccumulator(int i) { this.Accumulator = i; }
 
     public Registers getRegisters() {
         return new Registers(getPC(), getAccumulator(), cpuStop);
