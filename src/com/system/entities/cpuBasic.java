@@ -5,9 +5,13 @@ import com.system.handlers.enumCommands;
 import com.system.handlers.enumState;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Vector;
 
 public class cpuBasic {
+
+    protected int[][] IO;
+    protected int[] counter;
 
     protected int PC;
     protected int Accumulator;
@@ -33,12 +37,12 @@ public class cpuBasic {
     public void insertInstruction(String myString) {
         String[] parsed = mySplit(myString, " ");
 
-        if (parsed.length > 2)
+        if (parsed.length > 2) {
+            System.out.println(Arrays.toString(parsed));
             setCpuStop(enumState.InvalidInstructions);
-
+        }
         String cmd = parsed[0];
         enumCommands myEnum = tryEnum(cmd);
-        //System.out.println(cmd + ", got: " + myEnum);
 
         if (parsed.length > 1)
             memoryInstructions.add(new Tuple<>(myEnum.getCommand(), Integer.parseInt(parsed[1])));
@@ -112,9 +116,13 @@ public class cpuBasic {
         setCpuStop(enumState.Stop);
     }
     private void LE(int n) {
+        Accumulator = IO[n][counter[n]];
+        counter[n]++;
         setCpuStop(enumState.Read);
     }
     private void GRAVA(int n) {
+        IO[n][counter[n]] = Accumulator;
+        counter[n]++;
         setCpuStop(enumState.Save);
     }
     private void ERROR() {
@@ -145,7 +153,7 @@ public class cpuBasic {
 
     // Sees if an instruction has mandatory argument
     public static boolean hasArgument(int i) {
-        return i != 6 && i != 8 && i != 9 && i != 10;
+        return i != 6 && i != 8 && i != 11;
     }
 
     public void execute() {
@@ -162,7 +170,9 @@ public class cpuBasic {
         int i = aux.getX();
         Object n = aux.getY();
 
-        if(!hasArgument(i) && n != null || hasArgument(i) && n == null) {
+        System.out.println(PC + " : " + i + " " + n);
+
+        if((!hasArgument(i) && n != null ) || (hasArgument(i) && n == null)) {
             setCpuStop(enumState.InvalidInstructions);
             return;
         }

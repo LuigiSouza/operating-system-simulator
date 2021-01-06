@@ -15,7 +15,7 @@ import java.awt.event.WindowEvent;
 import java.util.Arrays;
 import java.util.Objects;
 
-public class Interface extends JFrame {
+public class cpuGUI extends JFrame {
     private JButton RunAll;
     private JButton Run;
     private JButton SaveState;
@@ -47,7 +47,6 @@ public class Interface extends JFrame {
     private JButton loadIO;
     private JTextField InputValue;
 
-    private final SO system;
     private final CPU cpu;
     public Registers reg;
 
@@ -62,11 +61,10 @@ public class Interface extends JFrame {
         StateField.setText("State: " + cpu.getState().toString());
     }
 
-    public Interface(CPU cpu) {
+    public cpuGUI(CPU cpu) {
         super();
 
-        this.system = new SO(8);
-        this.cpu = system.getCpu();
+        this.cpu = cpu;
 
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 

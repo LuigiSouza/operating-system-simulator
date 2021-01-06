@@ -14,11 +14,18 @@ public class Timer {
 
     private Map<Integer, String> interruption = new HashMap<>();
 
-    private static float timePassed = 1 / 60f;
 
     public Timer(){
         timer = 0;
         dt = 0f;
+    }
+
+    public void dealInterruption(int i) {
+        if(this.interruption.get(i) == null) return;
+
+        System.out.println("Dealing with '" + this.interruption.get(i) + "' interruption");
+        try { Thread.sleep (1000); } catch (InterruptedException ex) { System.out.println(ex); }
+        this.interruption.remove(i);
     }
 
     public void addTimer() {
@@ -30,16 +37,10 @@ public class Timer {
     }
 
     public void updateTimer() {
-        dt += timePassed;
+        this.timer++;
+        dealInterruption(timer);
     }
 
-    public float getDt() {
-        return dt;
-    }
-
-    public String isInterruption(int i) {
-        return this.interruption.get(i);
-    }
 
     public void setInterruption(int i, String pause) {
         this.interruption.put(i, pause);

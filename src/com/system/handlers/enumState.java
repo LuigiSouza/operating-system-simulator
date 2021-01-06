@@ -5,6 +5,7 @@ public enum enumState {
     InvalidInstructions,
     InvalidMemory,
     Stop,
+    Sleep,
     Read,
     Save;
 }

@@ -33,11 +33,13 @@ public class CPU extends cpuBasic {
     }
 
     // Setup CPU with memory allocated
-    public CPU (int i) {
+    public CPU (int i, int j) {
         this.PC = 0;
         this.cpuStop = enumState.Normal;
         this.Accumulator = 0;
         this.memory = new int[i];
+        this.IO = new int[j][3*i];
+        this.counter = new int[j];
     }
 
     // Starts a full empty CPU
@@ -68,8 +70,6 @@ public class CPU extends cpuBasic {
     // Set CPU state back to normal, in case was a normal interruption, increment PC
     public void setCpuStopToNormal() {
         if ( cpuStop != enumState.Normal ) {
-            if(this.cpuStop == enumState.Read || this.cpuStop == enumState.Save)
-                PC++;
             this.cpuStop = enumState.Normal;
         }
     }
@@ -174,7 +174,7 @@ public class CPU extends cpuBasic {
     public enumState getState() { return cpuStop; }
 
     public enumState executeAll() {
-        while( !this.isCpuStop() && SO.timer.isInterruption(SO.timer.getTimer()) == null) {
+        while( !this.isCpuStop() ) {
             this.execute();
             SO.timer.addTimer();
         }

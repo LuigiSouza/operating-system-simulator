@@ -7,17 +7,12 @@ import java.util.ArrayList;
 
 public class SO {
 
-    private int[][] IO;
-    private final int[] counter = { 0, 0 };
 
     private CPU cpu;
     public static Timer timer;
 
-    public SO(int i) {
-        int sizeMem = i;
-
-        cpu = new CPU(sizeMem);
-        IO = new int[2][sizeMem];
+    public SO(int i, int j) {
+        cpu = new CPU(i, j);
 
         timer = new Timer();
     }
@@ -29,14 +24,15 @@ public class SO {
             ret = cpu.executeAll();
 
             if(ret == enumState.Save) {
-                IO[1][counter[1]] = cpu.getAccumulator();
+                timer.setInterruption(timer.getTimer()+1, "salvamento");
                 cpu.setCpuStopToNormal();
             }
             if(ret == enumState.Read) {
-                cpu.setAccumulator(IO[0][counter[0]]);
+                timer.setInterruption(timer.getTimer()+1, "leitura");
                 cpu.setCpuStopToNormal();
             }
 
+            timer.updateTimer();
         }
 
     }
