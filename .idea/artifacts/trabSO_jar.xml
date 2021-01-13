@@ -3,7 +3,7 @@
     <output-path>$PROJECT_DIR$/src/resources</output-path>
     <root id="archive" name="trabSO.jar">
       <element id="directory" name="META-INF">
-        <element id="file-copy" path="$PROJECT_DIR$/src/resources/META-INF/MANIFEST.MF" />
+        <element id="file-copy" path="$PROJECT_DIR$/resources/META-INF/MANIFEST.MF" />
       </element>
       <element id="module-output" name="trabSO" />
     </root>

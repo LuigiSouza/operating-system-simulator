@@ -10,22 +10,22 @@ import java.util.Vector;
 public class Timer {
 
     private int timer;
-    private float dt;
 
-    private Map<Integer, String> interruption = new HashMap<>();
+    private final Map<Integer, Integer> interruption;
 
 
     public Timer(){
         timer = 0;
-        dt = 0f;
+        interruption = new HashMap<>();
     }
 
-    public void dealInterruption(int i) {
-        if(this.interruption.get(i) == null) return;
+    public int dealInterruption(int i) {
+        if(this.interruption.get(i) == null) return -1;
 
-        System.out.println("Dealing with '" + this.interruption.get(i) + "' interruption");
-        try { Thread.sleep (1000); } catch (InterruptedException ex) { System.out.println(ex); }
+        int ret = this.interruption.get(i);
+        System.out.println("Process '" + this.interruption.get(i) + "' is Ready");
         this.interruption.remove(i);
+        return ret;
     }
 
     public void addTimer() {
@@ -36,13 +36,13 @@ public class Timer {
         return timer;
     }
 
-    public void updateTimer() {
+    public int updateTimer() {
         this.timer++;
-        dealInterruption(timer);
+        return dealInterruption(timer);
     }
 
 
-    public void setInterruption(int i, String pause) {
-        this.interruption.put(i, pause);
+    public void setInterruption(int i, int pause) {
+        this.interruption.put(this.timer + i, pause);
     }
 }

@@ -1,0 +1,157 @@
+package com.system.entities;
+
+import com.system.handlers.Tuple;
+import com.system.handlers.enumCommands;
+import com.system.handlers.enumState;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+
+import static com.system.entities.CPU.mySplit;
+import static com.system.entities.CPU.tryEnum;
+
+public class Process {
+
+    private final int[] memory;
+
+    protected boolean blocked = false;
+    protected boolean ended = false;
+
+    private final double priority;
+
+    private final ArrayList<Tuple<Integer, Integer>> instructions = new ArrayList<>();
+
+    private Registers registers;
+
+    private int date_release;
+    private final int sizeProgram;
+
+    private final int[][] IO;
+    private final int[] counter;
+    private final int[] cost;
+
+    public void insertInstruction(String myString) {
+        String[] parsed = mySplit(myString, " ");
+
+        if (parsed.length > 2) {
+            System.out.println(Arrays.toString(parsed));
+            registers.State = enumState.InvalidInstructions;
+        }
+        String cmd = parsed[0];
+        enumCommands myEnum = tryEnum(cmd);
+
+        if (parsed.length > 1)
+            instructions.add(new Tuple<>(myEnum.getCommand(), Integer.parseInt(parsed[1])));
+        else
+            instructions.add(new Tuple<>(myEnum.getCommand(), null));
+
+    }
+
+    public Process(JSONObject obj) {
+
+        registers = new Registers(0, 0, enumState.Normal);
+
+        JSONObject jobObject = (JSONObject) obj.get("job");
+
+        JSONArray inst = (JSONArray) jobObject.get("program");
+        priority = Double.parseDouble((String) jobObject.get("priority"));
+        memory = new int[Integer.parseInt((String) jobObject.get("memory"))];
+
+        int sizeMem = Integer.parseInt((String) jobObject.get("IOSize"));
+        JSONArray memObj = (JSONArray) jobObject.get("IO");
+
+        int qtdMem = memObj.size();
+        IO = new int[qtdMem][sizeMem];
+        counter = new int[qtdMem];
+        cost = new int[qtdMem];
+
+        int i = 0;
+        for (Object mem : memObj) {
+            JSONObject objectMem = (JSONObject) mem;
+            cost[i] =  Integer.parseInt((String) objectMem.get("cost"));
+            int j = 0;
+            for(Object data : (JSONArray) objectMem.get("data")) {
+                IO[i][j] = Integer.parseInt((String) data);
+                j++;
+            }
+            i++;
+        }
+
+        inst.forEach(str -> insertInstruction((String) str));
+
+        sizeProgram = instructions.size();
+    }
+
+    public void printAll() {
+
+        System.out.print("memory: ");
+        for(int i : memory)
+            System.out.print(i + " ");
+        System.out.println();
+
+        System.out.println("estado: " + registers.getState());
+        System.out.println("prioridade: " + priority);
+        System.out.println("PC: " + registers.getPC());
+        System.out.println("A: " + registers.getAccumulator());
+        System.out.println("size: " + sizeProgram);
+        System.out.print("IO: ");
+
+        for(int j[] : IO)
+            for(int i : j)
+            System.out.print(i + " ");
+        System.out.println();
+
+        System.out.print("counter: ");
+        for(int i : counter)
+            System.out.print(i + " ");
+        System.out.println();
+
+        System.out.print("cost: ");
+        for(int i : cost)
+            System.out.print(i + " ");
+        System.out.println();
+
+        for(int i = 0; i < sizeProgram; i++) {
+            System.out.print(instructions.get(i).getX() + " ");
+            System.out.println(instructions.get(i).getY());
+        }
+    }
+
+    public int[] getMemory() {
+        return memory;
+    }
+
+    protected Registers getRegisters() {
+        return this.registers;
+    }
+
+    public int[][] getIO() {
+        return IO;
+    }
+
+    public int[] getCost() {
+        return cost;
+    }
+
+    public int[] getCounter() {
+        return counter;
+    }
+
+    public ArrayList<Tuple<Integer, Integer>> getInstructions() {
+        return instructions;
+    }
+
+    public enumState getState() {
+        return registers.getState();
+    }
+
+    public double getPriority() {
+        return priority;
+    }
+
+    public void setRegisters(Registers reg) {
+        this.registers = reg;
+    }
+}

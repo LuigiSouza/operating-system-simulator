@@ -1,43 +1,51 @@
 package com.system.entities;
 
-import com.system.entities.CPU;
 import com.system.handlers.enumState;
-
-import java.util.ArrayList;
 
 public class SO {
 
 
     private CPU cpu;
+
     public static Timer timer;
 
-    public SO(int i, int j) {
-        cpu = new CPU(i, j);
+    private Escalonador escalonador;
 
+    public SO() {
         timer = new Timer();
+
+        escalonador = new Escalonador();
+
+        escalonador.readJobs("jobs.json");
+
+        cpu = new CPU(escalonador.getCurrentProcess());
     }
 
     public void start() {
 
-        enumState ret = enumState.Normal;
-        while(ret != enumState.Stop) {
-            ret = cpu.executeAll();
+        while (!escalonador.isEnd()) {
 
-            if(ret == enumState.Save) {
-                timer.setInterruption(timer.getTimer()+1, "salvamento");
-                cpu.setCpuStopToNormal();
-            }
-            if(ret == enumState.Read) {
-                timer.setInterruption(timer.getTimer()+1, "leitura");
-                cpu.setCpuStopToNormal();
-            }
+            int pause = cpu.execute();
+            int update = timer.updateTimer();
 
-            timer.updateTimer();
+            if (pause > -1 || cpu.getState() == enumState.Stop) {
+                if(cpu.getState() == enumState.Stop)
+                    escalonador.setJobEnd();
+                else
+                    timer.setInterruption(pause, escalonador.getProcessControl());
+
+                escalonador.block();
+
+                if(escalonador.nextJob() > -1)
+                    cpu = new CPU(escalonador.getCurrentProcess());
+
+            }
+            if (update > -1 ) {
+                escalonador.setProcessNormal(update);
+                escalonador.unlockProcess(update);
+            }
         }
 
     }
 
-    public CPU getCpu() {
-        return cpu;
-    }
 }
