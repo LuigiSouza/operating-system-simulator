@@ -62,12 +62,16 @@ public class CPU {
     public void insertInstruction(String myString) {
         String[] parsed = mySplit(myString, " ");
 
-        if (parsed.length > 2) {
-            System.out.println(Arrays.toString(parsed));
+        if (parsed.length > 2)
             setCpuStop(enumState.InvalidInstructions);
-        }
+
         String cmd = parsed[0];
         enumCommands myEnum = tryEnum(cmd);
+
+
+        if((!hasArgument(myEnum.getCommand()) && parsed[1] != null ) || (hasArgument(myEnum.getCommand()) && parsed[1] == null))
+            setCpuStop(enumState.InvalidInstructions);
+
 
         if (parsed.length > 1)
             memoryInstructions.add(new Tuple<>(myEnum.getCommand(), Integer.parseInt(parsed[1])));
@@ -196,11 +200,6 @@ public class CPU {
 
         System.out.println("instrucao: " + registers.PC + " : " + inst + " " + arg);
 
-        if((!hasArgument(inst) && arg != null ) || (hasArgument(inst) && arg == null)) {
-            System.out.println("oi");
-            setCpuStop(enumState.InvalidInstructions);
-            return -1;
-        }
         registers.PC++;
         getInstruction[inst].execute(arg);
 

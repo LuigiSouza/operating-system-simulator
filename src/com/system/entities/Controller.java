@@ -18,6 +18,7 @@ public class Controller {
 
         System.out.println("CPU 0:");
         cpu = new CPU(so.escalonador.getCurrentProcess());
+        System.out.println(cpu.getState());
         timer.setPeriodic();
 
     }

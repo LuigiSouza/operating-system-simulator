@@ -35,17 +35,22 @@ public class Process {
     public void insertInstruction(String myString) {
         String[] parsed = mySplit(myString, " ");
 
-        if (parsed.length > 2) {
-            System.out.println(Arrays.toString(parsed));
-            registers.State = enumState.InvalidInstructions;
-        }
+        if (parsed.length > 2)
+            this.registers.State = enumState.InvalidInstructions;
+
         String cmd = parsed[0];
         enumCommands myEnum = tryEnum(cmd);
 
-        if (parsed.length > 1)
+        if (parsed.length > 1) {
             instructions.add(new Tuple<>(myEnum.getCommand(), Integer.parseInt(parsed[1])));
-        else
+            if(CPU.hasArgument(myEnum.getCommand()))
+                this.registers.State = enumState.InvalidInstructions;
+        }
+        else {
             instructions.add(new Tuple<>(myEnum.getCommand(), null));
+            if(!CPU.hasArgument(myEnum.getCommand()))
+                this.registers.State = enumState.InvalidInstructions;
+        }
 
     }
 

@@ -3,7 +3,7 @@
     "job": {
       "program": [
         "LE    0",
-        "ARMM  0",
+        "ARMM  1",
         "LE    1",
         "SOMA  0",
         "GRAVA 2",
