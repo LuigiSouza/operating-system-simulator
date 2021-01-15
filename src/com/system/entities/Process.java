@@ -9,8 +9,8 @@ import org.json.simple.JSONObject;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import static com.system.entities.CPU.mySplit;
-import static com.system.entities.CPU.tryEnum;
+import static com.system.handlers.VarsMethods.mySplit;
+import static com.system.handlers.VarsMethods.tryEnum;
 
 public class Process {
 
@@ -19,13 +19,13 @@ public class Process {
     protected boolean blocked = false;
     protected boolean ended = false;
 
-    private final double priority;
+    private double priority;
 
     private final ArrayList<Tuple<Integer, Integer>> instructions = new ArrayList<>();
 
     private Registers registers;
 
-    private int date_release;
+    protected int date_release = -1;
     private final int sizeProgram;
 
     private final int[][] IO;
@@ -56,7 +56,7 @@ public class Process {
         JSONObject jobObject = (JSONObject) obj.get("job");
 
         JSONArray inst = (JSONArray) jobObject.get("program");
-        priority = Double.parseDouble((String) jobObject.get("priority"));
+        priority = 0.5d;
         memory = new int[Integer.parseInt((String) jobObject.get("memory"))];
 
         int sizeMem = Integer.parseInt((String) jobObject.get("IOSize"));
@@ -153,5 +153,9 @@ public class Process {
 
     public void setRegisters(Registers reg) {
         this.registers = reg;
+    }
+
+    protected void setPriority(double i) {
+        this.priority = i;
     }
 }

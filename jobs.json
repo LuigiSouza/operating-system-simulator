@@ -12,12 +12,11 @@
         "DESVZ 0",
         "PARA"
       ],
-      "priority": "0.58",
       "memory": "4",
       "IOSize": "3",
       "IO": [
         {
-          "cost": "2",
+          "cost": "5",
           "data": [
             "1",
             "2",
@@ -64,13 +63,13 @@
           "CARGM 0",
           "GRAVA 1",
           "PARA"
-        ],
-      "priority": "0.58",
+        ],,
       "memory": "4",
+      "priority": "0.58",
       "IOSize": "3",
       "IO": [
         {
-        "cost": "2",
+        "cost": "4",
         "data": [
             "1", "2", "3"
         ]

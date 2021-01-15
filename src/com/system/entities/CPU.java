@@ -13,6 +13,9 @@ import java.util.Arrays;
 import java.util.Scanner;
 import java.util.Vector;
 
+import static com.system.handlers.VarsMethods.mySplit;
+import static com.system.handlers.VarsMethods.tryEnum;
+
 
 public class CPU {
 
@@ -38,24 +41,6 @@ public class CPU {
         this.registers.PC = reg.getPC();
         this.registers.State = reg.getState();
         this.registers.Accumulator = reg.getAccumulator();
-    }
-
-    // Setup CPU with memory allocated
-    public CPU (int i, int j) {
-        this.registers.PC = 0;
-        this.registers.State = enumState.Normal;
-        this.registers.Accumulator = 0;
-        this.memory = new int[i];
-        this.IO = new int[j][i];
-        this.counter = new int[j];
-        this.cost = new int[j];
-    }
-
-    // Starts a full empty CPU
-    public CPU () {
-        this.registers.PC = 0;
-        this.registers.State = enumState.Normal;
-        this.registers.Accumulator = 0;
     }
 
     public CPU (Process job) {
@@ -383,29 +368,4 @@ public class CPU {
 
     public enumState getState() { return registers.State; }
 
-    public static String[] mySplit(String str, String regex) {
-        Vector<String> result = new Vector<>();
-        int start = 0;
-        int pos = str.indexOf(regex);
-        while (pos>=start) {
-            if (pos>start) {
-                result.add(str.substring(start,pos));
-            }
-            start = pos + regex.length();
-            pos = str.indexOf(regex,start);
-        }
-        if (start<str.length()) {
-            result.add(str.substring(start));
-        }
-        return result.toArray(new String[0]);
-    }
-
-    public static enumCommands tryEnum (String myString) {
-        try {
-            return Enum.valueOf(enumCommands.class, myString);
-        } catch (IllegalArgumentException e) {
-            // log error or something here
-            return Enum.valueOf(enumCommands.class, "ERROR");
-        }
-    }
 }

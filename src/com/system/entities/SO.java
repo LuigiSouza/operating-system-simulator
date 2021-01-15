@@ -2,50 +2,33 @@ package com.system.entities;
 
 import com.system.handlers.enumState;
 
+import static com.system.handlers.VarsMethods.initial_quantum;
+
 public class SO {
 
+    protected final Escalonador escalonador;
 
-    private CPU cpu;
+    private static int quantum = initial_quantum;
 
-    public static Timer timer;
-
-    private Escalonador escalonador;
-
-    public SO() {
-        timer = new Timer();
-
-        escalonador = new Escalonador();
-
-        escalonador.readJobs("jobs.json");
-
-        cpu = new CPU(escalonador.getCurrentProcess());
+    public void subQuantum() {
+        quantum = Math.max(0, Math.min(quantum - 1, quantum));
     }
 
-    public void start() {
+    public void resetQuantum() {
+        quantum = initial_quantum;
+    }
 
-        while (!escalonador.isEnd()) {
+    public static int getQuantum() {
+        return quantum;
+    }
 
-            int pause = cpu.execute();
-            int update = timer.updateTimer();
+    public SO(String str) {
+        escalonador = new Escalonador(str);
+    }
 
-            if (pause > -1 || cpu.getState() == enumState.Stop) {
-                if(cpu.getState() == enumState.Stop)
-                    escalonador.setJobEnd();
-                else
-                    timer.setInterruption(pause, escalonador.getProcessControl());
-
-                escalonador.block();
-
-                if(escalonador.nextJob() > -1)
-                    cpu = new CPU(escalonador.getCurrentProcess());
-
-            }
-            if (update > -1 ) {
-                escalonador.setProcessNormal(update);
-                escalonador.unlockProcess(update);
-            }
-        }
-
+    public boolean error() {
+        return (escalonador.getCurrentProcess().getState() == enumState.InvalidMemory ||
+                escalonador.getCurrentProcess().getState() == enumState.InvalidInstructions);
     }
 
 }

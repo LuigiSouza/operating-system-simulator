@@ -9,6 +9,8 @@ import org.json.simple.parser.ParseException;
 import java.io.FileReader;
 import java.io.IOException;
 
+import static com.system.handlers.VarsMethods.initial_quantum;
+
 public class Escalonador {
 
     private Process[] Jobs;
@@ -17,11 +19,7 @@ public class Escalonador {
 
     private boolean end = false;
 
-    public Escalonador() {
-
-    }
-
-    public void readJobs(String str) {
+    public Escalonador(String str) {
         //JSON parser object to parse read file
         JSONParser jsonParser = new JSONParser();
 
@@ -44,6 +42,7 @@ public class Escalonador {
         }
     }
 
+
     public int getProcessControl() {
         return processControl;
     }
@@ -53,10 +52,12 @@ public class Escalonador {
     }
 
     public Process getCurrentProcess() {
+        if (Jobs[processControl].date_release == -1)
+            Jobs[processControl].date_release = Controller.timer.getTimer();
         return Jobs[processControl];
     }
 
-    public boolean isEnd() {
+    protected boolean isEnd() {
         return end;
     }
 
@@ -69,14 +70,15 @@ public class Escalonador {
     }
 
     public int nextJob() {
+
         int index = -1;
-        double highest_priority = -1;
+        double highest_priority = 2;
         this.end = true;
+
         for (int i = 0; i < Jobs.length; i++) {
-            if (!Jobs[i].ended) {
+            if (!Jobs[i].ended)
                 this.end = false;
-            }
-            if (!Jobs[i].blocked && Jobs[i].getPriority() > highest_priority) {
+            if (!Jobs[i].blocked && Jobs[i].getPriority() < highest_priority) {
                 index = i;
                 highest_priority = Jobs[i].getPriority();
             }
@@ -86,6 +88,9 @@ public class Escalonador {
             return -1;
         if(index > -1)
             processControl = index;
+
+        Jobs[processControl].setPriority((Jobs[processControl].getPriority() + (1d - ((double) SO.getQuantum()/initial_quantum)))/2d);
+
         return index;
 
     }
