@@ -5,7 +5,8 @@ import com.system.handlers.enumCommands;
 import com.system.handlers.enumState;
 import com.system.handlers.enumStatus;
 
-import java.util.concurrent.TimeUnit;
+import java.io.FileWriter;
+import java.io.IOException;
 
 import static com.system.handlers.VarsMethods.initial_quantum;
 
@@ -53,6 +54,17 @@ public class SO {
         scheduler.getCurrentProcess().time_cpu_begin = System.nanoTime();
 
         self_controller.run();
+
+        end("log.txt");
+
+    }
+
+    private void end(String str) {
+        if(!error())
+            print_bench();
+        else
+            print_error();
+        SaveFile(str);
     }
 
     protected void change_process(int interruption) {
@@ -78,6 +90,8 @@ public class SO {
                 cpu.setCpuState(enumState.InvalidInstructions);
                 return;
             }
+            if(cpu.getState() == enumState.InvalidMemory)
+                return;
             timer.setInterruption(cost[arg], scheduler.getProcessControl());
             scheduler.getCurrentProcess().time_blocked += cost[arg];
         }
@@ -102,12 +116,15 @@ public class SO {
     }
 
     public void deal_periodic() {
+        System.out.println("quantum: " + quantum
+        );
         if (quantum == 0) {
             enumState temp = cpu.getState();
             cpu.setCpuState(enumState.Sleep);
 
             if (scheduler.nextJob() > -1) {
                 scheduler.getCurrentProcess().times_lost++;
+                System.out.println("perdeu lek");
                 scheduler.getCurrentProcess().update_cpu_time();
                 load_new_cpu();
                 scheduler.getCurrentProcess().time_cpu_begin = System.nanoTime();
@@ -129,8 +146,10 @@ public class SO {
             cpu.setAccumulator(IO[n][counter[n]]);
             counter[n]++;
         }
-        else
+        else {
+            cpu.setCpuState(enumState.InvalidMemory);
             System.out.println("Read File Overflow!");
+        }
     }
 
     private void GRAVA(int n) {
@@ -139,8 +158,10 @@ public class SO {
             IO[n][counter[n]] = cpu.getAccumulator();
             counter[n]++;
         }
-        else
+        else {
+            cpu.setCpuState(enumState.InvalidMemory);
             System.out.println("Write File Overflow!");
+        }
     }
 
     public void resetQuantum() {
@@ -168,17 +189,51 @@ public class SO {
         load_files(scheduler.getCurrentProcess());
     }
 
+    // Save instructions into a file
+    public void SaveFile(String str) {
+        try {
+            FileWriter myWriter = new FileWriter(str);
+
+            myWriter.write(VarsMethods.output);
+
+            myWriter.close();
+
+            System.out.println("File " + str + " created.");
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.out.println("An error occurred: " + e);
+        }
+    }
+
+    public void print_error() {
+        // Para facilitar leirtura
+        int pc = scheduler.getCurrentProcess().getRegisters().getPC();
+        int job = scheduler.getProcessControl();
+        enumState st = scheduler.getCurrentProcess().getState();
+        Object arg = cpu.getInstruction(pc-1).getY();
+
+        VarsMethods.output += "Error no Processo " + job + ": " + st + ", Instrucao " + pc + ": " + enumCommands.values()[cpu.getInstruction(pc-1).getX()] + " " + (arg == null ? "" : arg) + "\n";
+    }
+
+    public void print_bench() {
+        long os_time = System.nanoTime() - VarsMethods.start;
+        VarsMethods.output += "\nOS Total time: " + (os_time / 1000000d)  + "ms\n";
+        scheduler.printResults();
+        printResults();
+    }
+
     public void printResults() {
-        System.out.println("\nResultados Gerais:");
-        System.out.println("Timer: " + timer.getTimer());
-        System.out.println("Tempo Ativo: " + scheduler.time_cpu + " ás " + ((scheduler.total_time_cpu-scheduler.time_idle_begin)/ 1000000d) + "ms");
-        System.out.println("Tempo Ocioso: " + (timer.getTimer()-scheduler.time_cpu) + " ás " + ((scheduler.total_time_idle - VarsMethods.start) / 1000000d) + "ms");
-        System.out.println("Total de execuçoes do SO: " + (this.write_call+this.read_call+this.errors_call+this.stop_call));
-        System.out.println("Execucao do tipo LE: " + this.read_call);
-        System.out.println("Execucao do tipo GRAVA: " + this.write_call);
-        System.out.println("Execucao do tipo STOP: " + this.stop_call);
-        System.out.println("Execucao do tipo Ilegal: " + this.errors_call);
-        System.out.println("Trocas de Processo: " + scheduler.changes);
-        System.out.println("Numero de Preempsoes: " + scheduler.preemption_times);
+        VarsMethods.output += "\nResultados Gerais:\n";
+        VarsMethods.output += "Timer: " + timer.getTimer() + "\n";
+        VarsMethods.output += "Tempo Ativo: " + scheduler.time_cpu + " e " + (scheduler.total_time_cpu/ 1000000d) + "ms\n";
+        VarsMethods.output += "Tempo Ocioso: " + (timer.getTimer()-scheduler.time_cpu) + " e " + (scheduler.total_time_idle / 1000000d) + "ms\n";
+        VarsMethods.output += "Total de execuçoes do SO: " + (this.write_call+this.read_call+this.errors_call+this.stop_call) + "\n";
+        VarsMethods.output += "Execucao do tipo LE: " + this.read_call + "\n";
+        VarsMethods.output += "Execucao do tipo GRAVA: " + this.write_call + "\n";
+        VarsMethods.output += "Execucao do tipo STOP: " + this.stop_call + "\n";
+        VarsMethods.output += "Execucao do tipo Ilegal: " + this.errors_call + "\n";
+        VarsMethods.output += "Trocas de Processo: " + scheduler.changes + "\n";
+        VarsMethods.output += "Numero de Preempsoes: " + scheduler.preemption_times + "\n";
     }
 }

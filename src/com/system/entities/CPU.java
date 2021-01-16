@@ -183,7 +183,7 @@ public class CPU {
         int inst = aux.getX();
         Object arg = aux.getY();
 
-        //System.out.println("Instruction " + registers.PC + ": " + enumCommands.values()[inst] + " " + (arg == null ? "" : arg));
+        System.out.println("Instruction " + registers.PC + ": " + enumCommands.values()[inst] + " " + (arg == null ? "" : arg));
 
         registers.PC++;
         getInstruction[inst].execute(arg);

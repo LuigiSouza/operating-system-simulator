@@ -33,7 +33,7 @@ public class Process {
 
     protected int time_cpu = 0;
 
-    protected long time_cpu_begin = 0;
+    protected long time_cpu_begin = -1;
     protected long total_time_cpu = 0;
 
     protected int blocked_times = 0;
@@ -41,7 +41,7 @@ public class Process {
     protected int times_lost = 0;
 
     protected int time_blocked = 0;
-    protected long time_blocked_begin = 0;
+    protected long time_blocked_begin = -1;
     protected long total_time_blocked = 0;
     // ----------------
 

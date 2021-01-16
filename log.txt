@@ -1,0 +1,36 @@
+
+OS Total time: 6.3455ms
+
+Benchmark Process 0:
+Hora de Inicio: 0 e 1.4497ms:
+Hora de Termino: 22 e 6.0416ms:
+Tempo de Retorno: 22 e 4.5919ms:
+Tempo de CPU: 6 e 1.4233ms:
+Percentual de CPU: 27% em relacao ao timer e 57% em relacao ao tempo:
+Tempo Bloqueado: 11 ás 0.4975ms:
+Vezes Bloqueado: 4:
+Vezes Escalonado: 3:
+Numero de vezes que a CPU foi perdida: 2:
+
+Benchmark Process 1:
+Hora de Inicio: 1 e 5.042ms:
+Hora de Termino: 30 e 6.3335ms:
+Tempo de Retorno: 29 e 1.2915ms:
+Tempo de CPU: 16 e 0.3184ms:
+Percentual de CPU: 72% em relacao ao timer e 12% em relacao ao tempo:
+Tempo Bloqueado: 6 ás 0.2899ms:
+Vezes Bloqueado: 3:
+Vezes Escalonado: 4:
+Numero de vezes que a CPU foi perdida: 0:
+
+Resultados Gerais:
+Timer: 30
+Tempo Ativo: 22 e 2.4767ms
+Tempo Ocioso: 8 e 0.1008ms
+Total de execuçoes do SO: 7
+Execucao do tipo LE: 3
+Execucao do tipo GRAVA: 2
+Execucao do tipo STOP: 2
+Execucao do tipo Ilegal: 0
+Trocas de Processo: 7
+Numero de Preempsoes: 2

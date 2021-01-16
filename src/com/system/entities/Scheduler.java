@@ -22,10 +22,10 @@ public class Scheduler {
     // benchmark
     protected int time_cpu = 0;
 
-    protected long time_cpu_begin = 0;
+    protected long time_cpu_begin = -1;
     protected long total_time_cpu = 0;
 
-    protected long time_idle_begin = 0;
+    protected long time_idle_begin = -1;
     protected long total_time_idle = 0;
 
     protected int changes = 0;
@@ -47,10 +47,8 @@ public class Scheduler {
 
             Jobs = new Process[jobs.size()];
 
-            int i = 0;
-            for(Object job : jobs) {
-                Jobs[i] = new Process((JSONObject) job);
-                i++;
+            for(int i = 0; i < jobs.size(); i++) {
+                Jobs[i] = new Process((JSONObject) jobs.get(i));
             }
 
         } catch (IOException | ParseException e) {
@@ -74,7 +72,7 @@ public class Scheduler {
     }
 
     public Process getCurrentProcess() {
-        if (Jobs[processControl].date_release == -1) {
+        if (Jobs[processControl].date_release < 0) {
             Jobs[processControl].date_release = SO.timer.getTimer();
             Jobs[processControl].time_release = System.nanoTime();
         }
@@ -143,20 +141,19 @@ public class Scheduler {
     }
 
     public void printResults() {
-        int i = 0;
-        for(Process job : Jobs) {
-            System.out.printf("\nBenchmark Process %d:\n", i);
-            System.out.println("Hora de Inicio: " + job.date_release + " ás " + ((job.time_release - VarsMethods.start) / 1000000d) + "ms");
-            System.out.println("Hora de Termino: " + job.date_end + " ás " + ((job.time_end - VarsMethods.start) / 1000000d) + "ms");
-            System.out.println("Tempo de Retorno: " + (job.date_end - job.date_release) + " ás " + ((job.time_end - job.time_release) / 1000000d) + "ms");
-            System.out.println("Tempo de CPU: " + job.time_cpu + " ás " + (job.total_time_cpu / 1000000d) + "ms");
-            System.out.println("Percentual de CPU: " + (job.time_cpu*100/this.time_cpu) + "% e " + (job.total_time_cpu*100/this.total_time_cpu) + "%");
-            System.out.println("Tempo Bloqueado: " + job.time_blocked + " ás " + (job.total_time_blocked / 1000000d) + "ms");
-            System.out.println("Vezes Bloqueado: " + job.blocked_times);
-            System.out.println("Vezes Escalonado: " + job.times_schedule);
-            System.out.println("Numero de vezes que a CPU foi perdida: " + job.times_lost);
+        for(int i = 0; i < Jobs.length; i++) {
+            Process job = Jobs[i];
+            VarsMethods.output += "\nBenchmark Process " + i + ":\n";
+            VarsMethods.output += "Hora de Inicio: " + job.date_release + " e " + ((job.time_release - VarsMethods.start) / 1000000d) + "ms" + ":\n";
+            VarsMethods.output += "Hora de Termino: " + job.date_end + " e " + ((job.time_end - VarsMethods.start) / 1000000d) + "ms" + ":\n";
+            VarsMethods.output += "Tempo de Retorno: " + (job.date_end - job.date_release) + " e " + ((job.time_end - job.time_release) / 1000000d) + "ms" + ":\n";
+            VarsMethods.output += "Tempo de CPU: " + job.time_cpu + " e " + (job.total_time_cpu / 1000000d) + "ms" + ":\n";
+            VarsMethods.output += "Percentual de CPU: " + (job.time_cpu*100/this.time_cpu) + "% em relacao ao timer e " + (job.total_time_cpu*100/this.total_time_cpu) + "% em relacao ao tempo" + ":\n";
+            VarsMethods.output += "Tempo Bloqueado: " + job.time_blocked + " ás " + (job.total_time_blocked / 1000000d) + "ms" + ":\n";
+            VarsMethods.output += "Vezes Bloqueado: " + job.blocked_times + ":\n";
+            VarsMethods.output += "Vezes Escalonado: " + job.times_schedule + ":\n";
+            VarsMethods.output += "Numero de vezes que a CPU foi perdida: " + job.times_lost + ":\n";
             preemption_times += job.times_lost;
-            i++;
         }
     }
 }

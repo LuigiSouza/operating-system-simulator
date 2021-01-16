@@ -25,7 +25,7 @@ public class Timer {
         if(this.interruption.get(i) == null) return -1;
 
         int ret = this.interruption.get(i);
-        //System.out.println("Timer: '" + this.interruption.get(i) + "' interruption");
+        System.out.println("Timer: '" + this.interruption.get(i) + "' interruption");
         this.interruption.remove(i);
         return ret;
     }
@@ -49,7 +49,7 @@ public class Timer {
 
     public void setPeriodic() {
         this.interruption.remove(periodic_pause);
-        this.periodic_pause = this.timer + initial_quantum;
+        this.periodic_pause = this.timer + initial_quantum + 1;
         while (this.interruption.get(this.periodic_pause) != null) {
             periodic_pause++;
         }

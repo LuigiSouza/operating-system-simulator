@@ -3,6 +3,7 @@ package com.system.entities;
 import com.system.handlers.enumState;
 import com.system.handlers.enumStatus;
 
+
 public class Controller {
 
     private final SO so;
@@ -15,7 +16,11 @@ public class Controller {
 
     public void run(){
         so.scheduler.time_cpu_begin = System.nanoTime();
+        so.scheduler.getCurrentProcess().time_cpu_begin = System.nanoTime();
+
         while (!so.scheduler.isEnd() && !so.error() && SO.timer.getTimer() < 200) {
+
+            System.out.print("laco ");
 
             if (so.cpu.getState() != enumState.Normal)
                 so.scheduler.time_idle_begin = System.nanoTime();
@@ -37,6 +42,7 @@ public class Controller {
 
             if (so.cpu.getState() == enumState.Normal)
                 so.scheduler.update_idle_time();
+
             if (so.cpu.getState() != enumState.Normal && so.scheduler.time_idle_begin < 0)
                 so.scheduler.time_idle_begin = System.nanoTime();
 
@@ -49,11 +55,6 @@ public class Controller {
         }
         so.scheduler.update_idle_time();
         so.scheduler.total_time_cpu += System.nanoTime() - so.scheduler.time_cpu_begin;
-        print_bench();
     }
 
-    public void print_bench() {
-        so.scheduler.printResults();
-        so.printResults();
-    }
 }
