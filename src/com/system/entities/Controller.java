@@ -1,59 +1,59 @@
 package com.system.entities;
 
 import com.system.handlers.enumState;
+import com.system.handlers.enumStatus;
 
 public class Controller {
 
-    public static Timer timer;
+    private final SO so;
 
-    private static CPU cpu;
+    public Controller(SO so) {
 
-    private static SO so;
+        this.so = so;
 
-    public Controller() {
-
-        timer = new Timer();
-
-        so = new SO("jobs.json");
-
-        System.out.println("CPU 0:");
-        cpu = new CPU(so.escalonador.getCurrentProcess());
-        System.out.println(cpu.getState());
-        timer.setPeriodic();
-
-    }
-
-    private void change_process(int interruption, int preempcao) {
-        if (cpu.getState() == enumState.Stop)
-            so.escalonador.setJobEnd();
-        else
-            timer.setInterruption(preempcao != -2 ? interruption : 5, so.escalonador.getProcessControl());
-
-        so.escalonador.block();
-
-        cpu.setCpuStop(enumState.Sleep);
-
-        if (so.escalonador.nextJob() > -1) {
-            cpu = new CPU(so.escalonador.getCurrentProcess());
-            System.out.println("CPU " + so.escalonador.getProcessControl() + ":");
-            timer.setPeriodic();
-        }
     }
 
     public void run(){
-        while (!so.escalonador.isEnd() && !so.error()) {
+        so.scheduler.time_cpu_begin = System.nanoTime();
+        while (!so.scheduler.isEnd() && !so.error() && SO.timer.getTimer() < 200) {
 
-            int pause = cpu.execute();
+            if (so.cpu.getState() != enumState.Normal)
+                so.scheduler.time_idle_begin = System.nanoTime();
 
-            int update = timer.updateTimer();
+            int pause = so.cpu.execute();
 
-            if (pause > -1 || update == -2 || cpu.getState() == enumState.Stop || cpu.getState() == enumState.Sleep)
-                change_process(pause, update);
+            int update = SO.timer.updateTimer();
+
+            if (pause == enumStatus.Next.getStatus() || pause == enumStatus.Syscall.getStatus()){
+                so.scheduler.getCurrentProcess().time_cpu++;
+                so.scheduler.time_cpu++;
+                SO.subQuantum();
+            }
+            if (pause != enumStatus.Next.getStatus())
+                so.change_process(pause);
+
+            if (update == -2)
+                so.deal_periodic();
+
+            if (so.cpu.getState() == enumState.Normal)
+                so.scheduler.update_idle_time();
+            if (so.cpu.getState() != enumState.Normal && so.scheduler.time_idle_begin < 0)
+                so.scheduler.time_idle_begin = System.nanoTime();
 
             if (update > -1) {
-                so.escalonador.setProcessNormal(update);
-                so.escalonador.unlockProcess(update);
+                so.scheduler.setProcessNormal(update);
+                so.scheduler.unlockProcess(update);
+                if(so.scheduler.isCurrent(update))
+                    so.scheduler.getCurrentProcess().time_cpu_begin = System.nanoTime();
             }
         }
+        so.scheduler.update_idle_time();
+        so.scheduler.total_time_cpu += System.nanoTime() - so.scheduler.time_cpu_begin;
+        print_bench();
+    }
+
+    public void print_bench() {
+        so.scheduler.printResults();
+        so.printResults();
     }
 }

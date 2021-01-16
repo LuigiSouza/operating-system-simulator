@@ -3,6 +3,7 @@ package com.system.entities;
 import com.system.handlers.Tuple;
 import com.system.handlers.enumCommands;
 import com.system.handlers.enumState;
+import com.system.handlers.enumStatus;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -18,10 +19,6 @@ import static com.system.handlers.VarsMethods.tryEnum;
 
 
 public class CPU {
-
-    private int[][] IO;
-    private int[] counter;
-    private int[] cost;
 
     private Registers registers;
 
@@ -46,9 +43,6 @@ public class CPU {
     public CPU (Process job) {
         this.memory = job.getMemory();
         this.registers = job.getRegisters();
-        this.IO = job.getIO();
-        this.counter = job.getCounter();
-        this.cost = job.getCost();
         this.registers.State = job.getState();
         this.memoryInstructions = job.getInstructions();
         this.sizeProgram = memoryInstructions.size();
@@ -63,15 +57,10 @@ public class CPU {
         String[] parsed = mySplit(myString, " ");
 
         if (parsed.length > 2)
-            setCpuStop(enumState.InvalidInstructions);
+            registers.State = enumState.InvalidInstructions;
 
         String cmd = parsed[0];
         enumCommands myEnum = tryEnum(cmd);
-
-
-        if((!hasArgument(myEnum.getCommand()) && parsed[1] != null ) || (hasArgument(myEnum.getCommand()) && parsed[1] == null))
-            setCpuStop(enumState.InvalidInstructions);
-
 
         if (parsed.length > 1)
             memoryInstructions.add(new Tuple<>(myEnum.getCommand(), Integer.parseInt(parsed[1])));
@@ -99,7 +88,7 @@ public class CPU {
         if(n < memory.length)
             registers.Accumulator = memory[n];
         else
-            setCpuStop(enumState.InvalidMemory);
+            registers.State = enumState.InvalidMemory;
     }
     private void CARGX(int n) {
         if(n < memory.length) {
@@ -109,13 +98,13 @@ public class CPU {
                 return;
             }
         }
-        setCpuStop(enumState.InvalidMemory);
+        registers.State = enumState.InvalidMemory;
     }
     private void ARMM(int n) {
         if(n < memory.length)
             memory[n] = registers.Accumulator;
         else
-            setCpuStop(enumState.InvalidMemory);
+            registers.State = enumState.InvalidMemory;
     }
     private void ARMX(int n) {
         if(n < memory.length) {
@@ -125,13 +114,13 @@ public class CPU {
                 return;
             }
         }
-        setCpuStop(enumState.InvalidMemory);
+        registers.State = enumState.InvalidMemory;
     }
     private void SOMA(int n) {
         if(n < memory.length)
             registers.Accumulator += memory[n];
         else
-            setCpuStop(enumState.InvalidMemory);
+            registers.State = enumState.InvalidMemory;
     }
     private void NEG() {
         registers.Accumulator *= -1;
@@ -142,20 +131,16 @@ public class CPU {
         }
     }
     private void PARA() {
-        setCpuStop(enumState.Stop);
+        registers.State = enumState.Stop;
     }
     private void LE(int n) {
-        registers.Accumulator = IO[n][counter[n]];
-        counter[n]++;
-        setCpuStop(enumState.Sleep);
+        registers.State = enumState.InvalidInstructions;
     }
     private void GRAVA(int n) {
-        IO[n][counter[n]] = registers.Accumulator;
-        counter[n]++;
-        setCpuStop(enumState.Sleep);
+        registers.State = enumState.InvalidInstructions;
     }
     private void ERROR() {
-        setCpuStop(enumState.InvalidInstructions);
+        registers.State = enumState.InvalidInstructions;
         registers.PC--;
     }
 
@@ -187,10 +172,10 @@ public class CPU {
 
     public int execute() {
         if(isCpuStop())
-            return -1;
+            return enumStatus.Stop.getStatus();
         if (registers.PC >= memoryInstructions.size()) {
-            setCpuStop(enumState.InvalidInstructions);
-            return -1;
+            registers.State = enumState.InvalidInstructions;
+            return enumStatus.Error.getStatus();
         }
 
         Tuple<Integer, Integer> aux = memoryInstructions.get(registers.PC);
@@ -198,24 +183,19 @@ public class CPU {
         int inst = aux.getX();
         Object arg = aux.getY();
 
-        System.out.println("instrucao: " + registers.PC + " : " + inst + " " + arg);
+        //System.out.println("Instruction " + registers.PC + ": " + enumCommands.values()[inst] + " " + (arg == null ? "" : arg));
 
         registers.PC++;
         getInstruction[inst].execute(arg);
 
-        if((inst == enumCommands.GRAVA.getCommand() || inst == enumCommands.LE.getCommand()) && arg != null)
-            return cost[(int) arg];
+        if (registers.State == enumState.InvalidInstructions)
+            return enumStatus.Syscall.getStatus();
+        if (registers.State == enumState.InvalidMemory)
+            return enumStatus.Error.getStatus();
+        if(isCpuStop())
+            return enumStatus.Stop.getStatus();
 
-        return -1;
-    }
-
-    public void popInstruction() {
-        if (getSizeProgram() <= 0)
-            return;
-        memoryInstructions.remove(memoryInstructions.get(memoryInstructions.size()-1));
-        setSizeProgram();
-        if(registers.PC >= getSizeProgram() && registers.PC > 0)
-            registers.PC--;
+        return enumStatus.Next.getStatus();
     }
 
     public void clearInstructions() {
@@ -224,7 +204,7 @@ public class CPU {
 
         registers.PC = 0;
         registers.Accumulator=0;
-        setCpuStop(enumState.Normal);
+        registers.State = enumState.Normal;
     }
 
     protected int getSizeProgram() { return sizeProgram; }
@@ -246,8 +226,8 @@ public class CPU {
         return ret.toString();
     }
 
-    public void setCpuStop(enumState i) {
-        registers.State = i;
+    public void setCpuState(enumState state) {
+        this.registers.State = state;
     }
 
     public boolean isCpuStop() { return registers.State != enumState.Normal; }
@@ -324,27 +304,6 @@ public class CPU {
             e.printStackTrace();
             return "An error occurred.";
         }
-    }
-
-    public void setUpMemory (int i) {
-        this.memory = new int[i];
-    }
-
-    public void changeMemory(int[] n){
-        for (int i = 0; i < n.length && i < this.memory.length; i++)
-            this.memory[i] = n[i];
-    }
-
-    public void setMemory(int[] i) {
-        this.memory = i;
-    }
-
-    public void resetMemory() {
-        Arrays.fill(this.memory, 0);
-    }
-
-    public int[] getMemory() {
-        return memory;
     }
 
     public int getAccumulator() {

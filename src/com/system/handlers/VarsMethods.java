@@ -6,6 +6,10 @@ public class VarsMethods {
 
     public static final int initial_quantum = 5;
 
+    public static final int periodic_pause = -2;
+
+    public static final long start = System.nanoTime();
+
     public static String[] mySplit(String str, String regex) {
         Vector<String> result = new Vector<>();
         int start = 0;

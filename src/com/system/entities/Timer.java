@@ -1,12 +1,9 @@
 package com.system.entities;
 
-import com.system.handlers.Tuple;
-import org.omg.PortableInterceptor.SYSTEM_EXCEPTION;
+import com.system.handlers.VarsMethods;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Vector;
 
 import static com.system.handlers.VarsMethods.initial_quantum;
 
@@ -28,7 +25,7 @@ public class Timer {
         if(this.interruption.get(i) == null) return -1;
 
         int ret = this.interruption.get(i);
-        System.out.println("Process '" + this.interruption.get(i) + "' is Ready");
+        //System.out.println("Timer: '" + this.interruption.get(i) + "' interruption");
         this.interruption.remove(i);
         return ret;
     }
@@ -56,6 +53,6 @@ public class Timer {
         while (this.interruption.get(this.periodic_pause) != null) {
             periodic_pause++;
         }
-        this.interruption.put(this.periodic_pause, -2);
+        this.interruption.put(this.periodic_pause, VarsMethods.periodic_pause);
     }
 }

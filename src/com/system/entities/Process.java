@@ -7,7 +7,6 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 
 import static com.system.handlers.VarsMethods.mySplit;
 import static com.system.handlers.VarsMethods.tryEnum;
@@ -25,12 +24,46 @@ public class Process {
 
     private Registers registers;
 
+    // Benchmark
     protected int date_release = -1;
+    protected int date_end = -1;
+
+    protected long time_release = -1;
+    protected long time_end = -1;
+
+    protected int time_cpu = 0;
+
+    protected long time_cpu_begin = 0;
+    protected long total_time_cpu = 0;
+
+    protected int blocked_times = 0;
+    protected int times_schedule = 0;
+    protected int times_lost = 0;
+
+    protected int time_blocked = 0;
+    protected long time_blocked_begin = 0;
+    protected long total_time_blocked = 0;
+    // ----------------
+
     private final int sizeProgram;
 
     private final int[][] IO;
     private final int[] counter;
     private final int[] cost;
+
+    public void update_cpu_time() {
+        if(time_cpu_begin < 0 )
+            return;
+        total_time_cpu += System.nanoTime() - time_cpu_begin;
+        time_cpu_begin = -1;
+    }
+
+    public void update_time_blocked() {
+        if(time_blocked_begin < 0 )
+            return;
+        total_time_blocked += System.nanoTime() - time_blocked_begin;
+        time_blocked_begin = -1;
+    }
 
     public void insertInstruction(String myString) {
         String[] parsed = mySplit(myString, " ");
@@ -43,12 +76,12 @@ public class Process {
 
         if (parsed.length > 1) {
             instructions.add(new Tuple<>(myEnum.getCommand(), Integer.parseInt(parsed[1])));
-            if(CPU.hasArgument(myEnum.getCommand()))
+            if(!CPU.hasArgument(myEnum.getCommand()))
                 this.registers.State = enumState.InvalidInstructions;
         }
         else {
             instructions.add(new Tuple<>(myEnum.getCommand(), null));
-            if(!CPU.hasArgument(myEnum.getCommand()))
+            if(CPU.hasArgument(myEnum.getCommand()))
                 this.registers.State = enumState.InvalidInstructions;
         }
 
