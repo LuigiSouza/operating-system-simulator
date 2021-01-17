@@ -65,28 +65,6 @@ public class Process {
         time_blocked_begin = -1;
     }
 
-    public void insertInstruction(String myString) {
-        String[] parsed = mySplit(myString, " ");
-
-        if (parsed.length > 2)
-            this.registers.State = enumState.InvalidInstructions;
-
-        String cmd = parsed[0];
-        enumCommands myEnum = tryEnum(cmd);
-
-        if (parsed.length > 1) {
-            instructions.add(new Tuple<>(myEnum.getCommand(), Integer.parseInt(parsed[1])));
-            if(!CPU.hasArgument(myEnum.getCommand()))
-                this.registers.State = enumState.InvalidInstructions;
-        }
-        else {
-            instructions.add(new Tuple<>(myEnum.getCommand(), null));
-            if(CPU.hasArgument(myEnum.getCommand()))
-                this.registers.State = enumState.InvalidInstructions;
-        }
-
-    }
-
     public Process(JSONObject obj) {
 
         registers = new Registers(0, 0, enumState.Normal);
@@ -94,7 +72,7 @@ public class Process {
         JSONObject jobObject = (JSONObject) obj.get("job");
 
         JSONArray inst = (JSONArray) jobObject.get("program");
-        priority = 0.5d;
+        priority = Double.parseDouble((String) jobObject.get("priority"));;
         memory = new int[Integer.parseInt((String) jobObject.get("memory"))];
 
         int sizeMem = Integer.parseInt((String) jobObject.get("IOSize"));
@@ -117,7 +95,7 @@ public class Process {
             i++;
         }
 
-        inst.forEach(str -> insertInstruction((String) str));
+        inst.forEach(str -> CPU.insertInstruction((String) str, this.instructions, registers));
 
         sizeProgram = instructions.size();
     }

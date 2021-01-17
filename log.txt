@@ -1,36 +1,58 @@
 
-OS Total time: 6.3455ms
+OS Total time: 4.9131ms
 
 Benchmark Process 0:
-Hora de Inicio: 0 e 1.4497ms:
-Hora de Termino: 22 e 6.0416ms:
-Tempo de Retorno: 22 e 4.5919ms:
-Tempo de CPU: 6 e 1.4233ms:
-Percentual de CPU: 27% em relacao ao timer e 57% em relacao ao tempo:
-Tempo Bloqueado: 11 ás 0.4975ms:
-Vezes Bloqueado: 4:
-Vezes Escalonado: 3:
-Numero de vezes que a CPU foi perdida: 2:
+Hora de Inicio: 0 e 0.907399ms:
+Hora de Termino: 21 e 4.5355ms:
+Tempo de Retorno: 21 e 3.628101ms:
+Tempo de CPU: 6 e 1.089501ms:
+Percentual de CPU: 8% em relacao ao timer e 67% em relacao ao tempo
+Tempo Bloqueado: 10 ás 0.1227ms
+Vezes Bloqueado: 4
+Vezes Escalonado: 3
+Numero de vezes que a CPU foi perdida: 0
 
 Benchmark Process 1:
-Hora de Inicio: 1 e 5.042ms:
-Hora de Termino: 30 e 6.3335ms:
-Tempo de Retorno: 29 e 1.2915ms:
-Tempo de CPU: 16 e 0.3184ms:
-Percentual de CPU: 72% em relacao ao timer e 12% em relacao ao tempo:
-Tempo Bloqueado: 6 ás 0.2899ms:
-Vezes Bloqueado: 3:
-Vezes Escalonado: 4:
-Numero de vezes que a CPU foi perdida: 0:
+Hora de Inicio: 1 e 4.3337ms:
+Hora de Termino: 45 e 4.6706ms:
+Tempo de Retorno: 44 e 0.3369ms:
+Tempo de CPU: 14 e 0.077498ms:
+Percentual de CPU: 19% em relacao ao timer e 4% em relacao ao tempo
+Tempo Bloqueado: 18 ás 0.157ms
+Vezes Bloqueado: 7
+Vezes Escalonado: 7
+Numero de vezes que a CPU foi perdida: 0
+
+Benchmark Process 2:
+Hora de Inicio: 2 e 4.353499ms:
+Hora de Termino: 68 e 4.778299ms:
+Tempo de Retorno: 66 e 0.4248ms:
+Tempo de CPU: 22 e 0.0886ms:
+Percentual de CPU: 30% em relacao ao timer e 5% em relacao ao tempo
+Tempo Bloqueado: 24 ás 0.236699ms
+Vezes Bloqueado: 10
+Vezes Escalonado: 10
+Numero de vezes que a CPU foi perdida: 0
+
+Benchmark Process 3:
+Hora de Inicio: 3 e 4.3643ms:
+Hora de Termino: 105 e 4.9071ms:
+Tempo de Retorno: 102 e 0.5428ms:
+Tempo de CPU: 30 e 0.121099ms:
+Percentual de CPU: 41% em relacao ao timer e 7% em relacao ao tempo
+Tempo Bloqueado: 48 ás 0.255302ms
+Vezes Bloqueado: 13
+Vezes Escalonado: 8
+Numero de vezes que a CPU foi perdida: 0
 
 Resultados Gerais:
-Timer: 30
-Tempo Ativo: 22 e 2.4767ms
-Tempo Ocioso: 8 e 0.1008ms
-Total de execuçoes do SO: 7
-Execucao do tipo LE: 3
-Execucao do tipo GRAVA: 2
-Execucao do tipo STOP: 2
-Execucao do tipo Ilegal: 0
-Trocas de Processo: 7
-Numero de Preempsoes: 2
+Timer: 105
+Tempo Ativo: 72 e 1.6152ms
+Tempo Ocioso: 33 e 0.062501ms
+Total de Chamadas do SO: 34
+Chamada do tipo LE: 20
+Chamada do tipo GRAVA: 10
+Chamada do tipo STOP: 4
+Chamada do tipo Ilegal: 0
+Trocas de Processo: 28
+Numero de Preempsoes: 0

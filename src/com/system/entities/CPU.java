@@ -50,24 +50,29 @@ public class CPU {
 
     public void insertInstruction(String[] myString) {
         for(String str : myString)
-            insertInstruction(str);
+            insertInstruction(str, this.memoryInstructions, registers);
         setSizeProgram();
     }
-    public void insertInstruction(String myString) {
+    public static void insertInstruction(String myString, ArrayList<Tuple<Integer, Integer>> array, Registers reg) {
         String[] parsed = mySplit(myString, " ");
 
         if (parsed.length > 2)
-            registers.State = enumState.InvalidInstructions;
+            reg.State = enumState.InvalidInstructions;
 
         String cmd = parsed[0];
         enumCommands myEnum = tryEnum(cmd);
 
-        if (parsed.length > 1)
-            memoryInstructions.add(new Tuple<>(myEnum.getCommand(), Integer.parseInt(parsed[1])));
-        else
-            memoryInstructions.add(new Tuple<>(myEnum.getCommand(), null));
+        if (parsed.length > 1) {
+            array.add(new Tuple<>(myEnum.getCommand(), Integer.parseInt(parsed[1])));
+            if(!CPU.hasArgument(myEnum.getCommand()))
+                reg.State = enumState.InvalidInstructions;
+        }
+        else {
+            array.add(new Tuple<>(myEnum.getCommand(), null));
+            if(CPU.hasArgument(myEnum.getCommand()))
+                reg.State = enumState.InvalidInstructions;
+        }
 
-        setSizeProgram();
     }
 
     protected Tuple<Integer, Integer> getInstruction(int PC) {
@@ -295,7 +300,7 @@ public class CPU {
             Scanner myReader = new Scanner(myObj);
             while (myReader.hasNextLine()) {
                 String data = myReader.nextLine();
-                this.insertInstruction(data);
+                insertInstruction(data, memoryInstructions, registers);
             }
             myReader.close();
 

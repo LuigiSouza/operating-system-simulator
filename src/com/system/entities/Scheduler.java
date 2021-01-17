@@ -19,6 +19,8 @@ public class Scheduler {
 
     private int processControl = 0;
 
+    private int next_job = 0;
+
     // benchmark
     protected int time_cpu = 0;
 
@@ -96,6 +98,11 @@ public class Scheduler {
         Jobs[processControl].setPriority((Jobs[processControl].getPriority() + (1d - ((double) SO.getQuantum()/initial_quantum)))/2d);
     }
 
+    public void loadNext() {
+        processControl = next_job;
+        //calculate_priority();
+    }
+
     public int nextJob() {
 
         int index = -1;
@@ -115,12 +122,11 @@ public class Scheduler {
         }
 
         Jobs[processControl].setPriority(temp);
-        calculate_priority();
 
         if(index == processControl)
             return -1;
         if(index > -1) {
-            processControl = index;
+            next_job = index;
             changes++;
         }
 
@@ -148,11 +154,11 @@ public class Scheduler {
             VarsMethods.output += "Hora de Termino: " + job.date_end + " e " + ((job.time_end - VarsMethods.start) / 1000000d) + "ms" + ":\n";
             VarsMethods.output += "Tempo de Retorno: " + (job.date_end - job.date_release) + " e " + ((job.time_end - job.time_release) / 1000000d) + "ms" + ":\n";
             VarsMethods.output += "Tempo de CPU: " + job.time_cpu + " e " + (job.total_time_cpu / 1000000d) + "ms" + ":\n";
-            VarsMethods.output += "Percentual de CPU: " + (job.time_cpu*100/this.time_cpu) + "% em relacao ao timer e " + (job.total_time_cpu*100/this.total_time_cpu) + "% em relacao ao tempo" + ":\n";
-            VarsMethods.output += "Tempo Bloqueado: " + job.time_blocked + " ás " + (job.total_time_blocked / 1000000d) + "ms" + ":\n";
-            VarsMethods.output += "Vezes Bloqueado: " + job.blocked_times + ":\n";
-            VarsMethods.output += "Vezes Escalonado: " + job.times_schedule + ":\n";
-            VarsMethods.output += "Numero de vezes que a CPU foi perdida: " + job.times_lost + ":\n";
+            VarsMethods.output += "Percentual de CPU: " + (job.time_cpu*100/this.time_cpu) + "% em relacao ao timer e " + (job.total_time_cpu*100/this.total_time_cpu) + "% em relacao ao tempo" + "\n";
+            VarsMethods.output += "Tempo Bloqueado: " + job.time_blocked + " ás " + (job.total_time_blocked / 1000000d) + "ms" + "\n";
+            VarsMethods.output += "Vezes Bloqueado: " + job.blocked_times + "\n";
+            VarsMethods.output += "Vezes Escalonado: " + job.times_schedule + "\n";
+            VarsMethods.output += "Numero de vezes que a CPU foi perdida: " + job.times_lost + "\n";
             preemption_times += job.times_lost;
         }
     }

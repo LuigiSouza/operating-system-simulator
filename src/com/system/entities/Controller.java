@@ -18,9 +18,9 @@ public class Controller {
         so.scheduler.time_cpu_begin = System.nanoTime();
         so.scheduler.getCurrentProcess().time_cpu_begin = System.nanoTime();
 
-        while (!so.scheduler.isEnd() && !so.error() && SO.timer.getTimer() < 200) {
+        while (!so.scheduler.isEnd() && !so.error() && SO.timer.getTimer() < 500) {
 
-            System.out.print("laco ");
+            //System.out.print("laco ");
 
             if (so.cpu.getState() != enumState.Normal)
                 so.scheduler.time_idle_begin = System.nanoTime();

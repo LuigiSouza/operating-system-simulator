@@ -4,7 +4,7 @@ import java.util.Vector;
 
 public class VarsMethods {
 
-    public static final int initial_quantum = 2;
+    public static final int initial_quantum = 15;
 
     public static final int periodic_pause = -2;
 

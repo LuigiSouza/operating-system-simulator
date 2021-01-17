@@ -37,7 +37,7 @@ public class SO {
         cost = p.getCost();
     }
 
-    public SO(String str) {
+    public SO(String str, String out) {
         timer = new Timer();
 
         scheduler = new Scheduler(str);
@@ -50,12 +50,9 @@ public class SO {
 
         self_controller = new Controller(this);
 
-        //System.out.printf("CPU: %d: \n", scheduler.getProcessControl());
-        scheduler.getCurrentProcess().time_cpu_begin = System.nanoTime();
-
         self_controller.run();
 
-        end("log.txt");
+        end(out);
 
     }
 
@@ -68,9 +65,10 @@ public class SO {
     }
 
     protected void change_process(int interruption) {
-        if (cpu.getState() == enumState.Stop) {
+        if (cpu.getState() == enumState.Stop && !scheduler.getCurrentProcess().ended) {
             stop_call++;
             scheduler.setJobEnd();
+            cpu.setCpuState(enumState.Sleep);
             if(scheduler.getCurrentProcess().date_end < 0) {
                 scheduler.getCurrentProcess().date_end = timer.getTimer();
                 scheduler.getCurrentProcess().time_end = System.nanoTime();
@@ -106,31 +104,27 @@ public class SO {
 
         if (scheduler.nextJob() > -1){
             load_new_cpu();
-            scheduler.getCurrentProcess().time_cpu_begin = System.nanoTime();
-            scheduler.getCurrentProcess().times_schedule++;
 
-            //System.out.printf("\nCPU: %d: \n", scheduler.getProcessControl());
+            scheduler.getCurrentProcess().times_schedule++;
 
             timer.setPeriodic();
         }
     }
 
     public void deal_periodic() {
-        System.out.println("quantum: " + quantum
-        );
         if (quantum == 0) {
             enumState temp = cpu.getState();
             cpu.setCpuState(enumState.Sleep);
 
             if (scheduler.nextJob() > -1) {
                 scheduler.getCurrentProcess().times_lost++;
-                System.out.println("perdeu lek");
+                System.out.println("perd eu");
                 scheduler.getCurrentProcess().update_cpu_time();
+
                 load_new_cpu();
-                scheduler.getCurrentProcess().time_cpu_begin = System.nanoTime();
+
                 scheduler.getCurrentProcess().times_schedule++;
 
-                //System.out.printf("\nCPU: %d: \n", scheduler.getProcessControl());
             }
             else
                 cpu.setCpuState(temp);
@@ -183,10 +177,14 @@ public class SO {
     }
 
     private void load_new_cpu() {
+        scheduler.loadNext();
         this.cpu = new CPU(scheduler.getCurrentProcess());
         if (cpu.getState() != enumState.InvalidInstructions && cpu.getState() != enumState.InvalidMemory)
             cpu.setCpuState(enumState.Normal);
         load_files(scheduler.getCurrentProcess());
+
+        scheduler.getCurrentProcess().time_cpu_begin = System.nanoTime();
+        System.out.printf("\nCPU: %d: \n", scheduler.getProcessControl());
     }
 
     // Save instructions into a file
@@ -228,11 +226,11 @@ public class SO {
         VarsMethods.output += "Timer: " + timer.getTimer() + "\n";
         VarsMethods.output += "Tempo Ativo: " + scheduler.time_cpu + " e " + (scheduler.total_time_cpu/ 1000000d) + "ms\n";
         VarsMethods.output += "Tempo Ocioso: " + (timer.getTimer()-scheduler.time_cpu) + " e " + (scheduler.total_time_idle / 1000000d) + "ms\n";
-        VarsMethods.output += "Total de execuçoes do SO: " + (this.write_call+this.read_call+this.errors_call+this.stop_call) + "\n";
-        VarsMethods.output += "Execucao do tipo LE: " + this.read_call + "\n";
-        VarsMethods.output += "Execucao do tipo GRAVA: " + this.write_call + "\n";
-        VarsMethods.output += "Execucao do tipo STOP: " + this.stop_call + "\n";
-        VarsMethods.output += "Execucao do tipo Ilegal: " + this.errors_call + "\n";
+        VarsMethods.output += "Total de Chamadas do SO: " + (this.write_call+this.read_call+this.errors_call+this.stop_call) + "\n";
+        VarsMethods.output += "Chamada do tipo LE: " + this.read_call + "\n";
+        VarsMethods.output += "Chamada do tipo GRAVA: " + this.write_call + "\n";
+        VarsMethods.output += "Chamada do tipo STOP: " + this.stop_call + "\n";
+        VarsMethods.output += "Chamada do tipo Ilegal: " + this.errors_call + "\n";
         VarsMethods.output += "Trocas de Processo: " + scheduler.changes + "\n";
         VarsMethods.output += "Numero de Preempsoes: " + scheduler.preemption_times + "\n";
     }
