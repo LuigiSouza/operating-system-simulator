@@ -1,3 +1,5 @@
+# README NOT READY
+
 # Operating System Simulator
 Simulator of a operating system to chair "ELC1080 - Sistemas Operacionais"
 
