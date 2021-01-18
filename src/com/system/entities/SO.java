@@ -118,7 +118,7 @@ public class SO {
 
             if (scheduler.nextJob() > -1) {
                 scheduler.getCurrentProcess().times_lost++;
-                System.out.println("perd eu");
+                System.out.println("perdseu");
                 scheduler.getCurrentProcess().update_cpu_time();
 
                 load_new_cpu();
