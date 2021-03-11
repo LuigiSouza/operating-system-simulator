@@ -69,10 +69,8 @@ public class SO {
             stop_call++;
             scheduler.setJobEnd();
             cpu.setCpuState(enumState.Sleep);
-            if(scheduler.getCurrentProcess().date_end < 0) {
+            if(scheduler.getCurrentProcess().date_end < 0)
                 scheduler.getCurrentProcess().date_end = timer.getTimer();
-                scheduler.getCurrentProcess().time_end = System.nanoTime();
-            }
         }
         else if(interruption == enumStatus.Syscall.getStatus()){
 
@@ -93,12 +91,10 @@ public class SO {
             timer.setInterruption(cost[arg], scheduler.getProcessControl());
             scheduler.getCurrentProcess().time_blocked += cost[arg];
         }
-        scheduler.getCurrentProcess().update_cpu_time();
 
-        if(!scheduler.getCurrentProcess().blocked){
-            scheduler.getCurrentProcess().time_blocked_begin = System.nanoTime();
+        if(!scheduler.getCurrentProcess().blocked)
             scheduler.getCurrentProcess().blocked_times++;
-        }
+
         scheduler.block();
         resetQuantum();
 
@@ -119,7 +115,6 @@ public class SO {
             if (scheduler.nextJob() > -1) {
                 scheduler.getCurrentProcess().times_lost++;
                 System.out.println("perdseu");
-                scheduler.getCurrentProcess().update_cpu_time();
 
                 load_new_cpu();
 
@@ -183,7 +178,6 @@ public class SO {
             cpu.setCpuState(enumState.Normal);
         load_files(scheduler.getCurrentProcess());
 
-        scheduler.getCurrentProcess().time_cpu_begin = System.nanoTime();
         System.out.printf("\nCPU: %d: \n", scheduler.getProcessControl());
     }
 
@@ -224,8 +218,8 @@ public class SO {
     public void printResults() {
         VarsMethods.output += "\nResultados Gerais:\n";
         VarsMethods.output += "Timer: " + timer.getTimer() + "\n";
-        VarsMethods.output += "Tempo Ativo: " + scheduler.time_cpu + " e " + (scheduler.total_time_cpu/ 1000000d) + "ms\n";
-        VarsMethods.output += "Tempo Ocioso: " + (timer.getTimer()-scheduler.time_cpu) + " e " + (scheduler.total_time_idle / 1000000d) + "ms\n";
+        VarsMethods.output += "Tempo Ativo: " + scheduler.time_cpu + "\n";
+        VarsMethods.output += "Tempo Ocioso: " + (timer.getTimer()-scheduler.time_cpu) + "\n";
         VarsMethods.output += "Total de Chamadas do SO: " + (this.write_call+this.read_call+this.errors_call+this.stop_call) + "\n";
         VarsMethods.output += "Chamada do tipo LE: " + this.read_call + "\n";
         VarsMethods.output += "Chamada do tipo GRAVA: " + this.write_call + "\n";

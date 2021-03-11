@@ -6,6 +6,8 @@ public class VarsMethods {
 
     public static final int initial_quantum = 5;
 
+    public static final int max_pauses = 10;
+
     public static final int periodic_pause = -2;
 
     public static final long start = System.nanoTime();
