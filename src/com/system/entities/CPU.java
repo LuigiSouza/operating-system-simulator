@@ -25,6 +25,8 @@ public class CPU {
     private int[] memory;
     private int sizeProgram;
 
+    private MMU mmu;
+
 
     /**
      *  First Integer: instruction index

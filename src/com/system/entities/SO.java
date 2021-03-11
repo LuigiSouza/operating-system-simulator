@@ -31,6 +31,9 @@ public class SO {
     private int[] counter;
     private int[] cost;
 
+    private FisicMemory fisicMemory;
+    private MMU mmu;
+
     private void load_files(Process p) {
         IO = p.getIO();
         counter = p.getCounter();
