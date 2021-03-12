@@ -1,6 +1,6 @@
 package com.system;
 
-import com.system.entities.SO;
+import com.system.entities.os.SO;
 
 public class Main {
 

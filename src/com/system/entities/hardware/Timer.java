@@ -1,4 +1,4 @@
-package com.system.entities;
+package com.system.entities.hardware;
 
 import com.system.handlers.MinHeap;
 import com.system.handlers.VarsMethods;

@@ -1,4 +1,4 @@
-package com.system.entities;
+package com.system.entities.memory;
 
 import java.util.Arrays;
 

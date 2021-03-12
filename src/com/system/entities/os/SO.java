@@ -1,5 +1,9 @@
-package com.system.entities;
+package com.system.entities.os;
 
+import com.system.entities.hardware.Timer;
+import com.system.entities.hardware.CPU;
+import com.system.entities.memory.MMU;
+import com.system.entities.hardware.PhysicalMemory;
 import com.system.handlers.VarsMethods;
 import com.system.handlers.enumCommands;
 import com.system.handlers.enumState;

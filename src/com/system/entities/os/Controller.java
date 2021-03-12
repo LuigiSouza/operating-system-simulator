@@ -1,7 +1,6 @@
-package com.system.entities;
+package com.system.entities.os;
 
 import com.system.handlers.VarsMethods;
-import com.system.handlers.enumState;
 import com.system.handlers.enumStatus;
 
 

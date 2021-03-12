@@ -1,5 +1,7 @@
-package com.system.entities;
+package com.system.entities.hardware;
 
+import com.system.entities.os.Process;
+import com.system.entities.memory.MMU;
 import com.system.handlers.Tuple;
 import com.system.handlers.enumCommands;
 import com.system.handlers.enumState;
@@ -36,15 +38,15 @@ public class CPU {
 
     // Setup empty CPU based on register
     public CPU (Registers reg) {
-        this.registers.PC = reg.getPC();
-        this.registers.State = reg.getState();
-        this.registers.Accumulator = reg.getAccumulator();
+        this.registers.setPC(reg.getPC());
+        this.registers.setState(reg.getState());
+        this.registers.setAccumulator(reg.getAccumulator());
     }
 
     public CPU (Process job, MMU mmu) {
         this.memory = job.getMemory();
         this.registers = job.getRegisters();
-        this.registers.State = job.getState();
+        this.registers.setState(job.getState());
         this.memoryInstructions = job.getInstructions();
         this.mmu = mmu;
     }
@@ -52,7 +54,7 @@ public class CPU {
     public CPU (Process job) {
         this.memory = job.getMemory();
         this.registers = job.getRegisters();
-        this.registers.State = job.getState();
+        this.registers.setState(job.getState());
         this.memoryInstructions = job.getInstructions();
         this.sizeProgram = memoryInstructions.size();
     }
@@ -66,7 +68,7 @@ public class CPU {
         String[] parsed = mySplit(myString, " ");
 
         if (parsed.length > 2)
-            reg.State = enumState.InvalidInstructions;
+            reg.setState(enumState.InvalidInstructions);
 
         String cmd = parsed[0];
         enumCommands myEnum = tryEnum(cmd);
@@ -74,21 +76,21 @@ public class CPU {
         if (parsed.length > 1) {
             array.add(new Tuple<>(myEnum.getCommand(), Integer.parseInt(parsed[1])));
             if(!CPU.hasArgument(myEnum.getCommand()))
-                reg.State = enumState.InvalidInstructions;
+                reg.setState(enumState.InvalidInstructions);
         }
         else {
             array.add(new Tuple<>(myEnum.getCommand(), null));
             if(CPU.hasArgument(myEnum.getCommand()))
-                reg.State = enumState.InvalidInstructions;
+                reg.setState(enumState.InvalidInstructions);
         }
 
     }
 
-    protected Tuple<Integer, Integer> getInstruction(int PC) {
+    public Tuple<Integer, Integer> getInstruction(int PC) {
         if (PC < getSizeProgram())
             return memoryInstructions.get(PC);
         else {
-            this.registers.PC--;
+            this.registers.setPC(this.registers.getPC() - 1);
             return new Tuple<>(enumCommands.ERROR.getCommand(), null);
         }
     }
@@ -96,18 +98,18 @@ public class CPU {
     // Instructions function -------------------------------------
 
     private void CARGI(int n) {
-        registers.Accumulator = n;
+        registers.setAccumulator(n);
     }
     private void CARGM(int n) {
         switch (mmu.check(n)) {
             case 0:
-                registers.State = enumState.PageFault;
+                registers.setState(enumState.PageFault);
                 break;
             case 1:
-                registers.Accumulator = mmu.read(n);
+                registers.setAccumulator(mmu.read(n));
                 break;
             case -1:
-                registers.State = enumState.InvalidMemory;
+                registers.setState(enumState.InvalidMemory);
                 break;
             default:
                 System.out.println("unknown code error");
@@ -116,25 +118,25 @@ public class CPU {
     private void CARGX(int n) {
         switch (mmu.check(n)) {
             case 0:
-                registers.State = enumState.PageFault;
+                registers.setState(enumState.PageFault);
                 break;
             case 1:
                 switch (mmu.check(mmu.read(n))) {
                     case 0:
-                        registers.State = enumState.PageFault;
+                        registers.setState(enumState.PageFault);
                         break;
                     case 1:
-                        registers.Accumulator = mmu.read(mmu.read(n));
+                        registers.setAccumulator(mmu.read(mmu.read(n)));
                         break;
                     case -1:
-                        registers.State = enumState.InvalidMemory;
+                        registers.setState(enumState.InvalidMemory);
                         break;
                     default:
                         System.out.println("unknown code error");
                 }
                 break;
             case -1:
-                registers.State = enumState.InvalidMemory;
+                registers.setState(enumState.InvalidMemory);
                 break;
             default:
                 System.out.println("unknown code error");
@@ -143,13 +145,13 @@ public class CPU {
     private void ARMM(int n) {
         switch (mmu.check(n)) {
             case 0:
-                registers.State = enumState.PageFault;
+                registers.setState(enumState.PageFault);
                 break;
             case 1:
-                mmu.write(registers.Accumulator, n);
+                mmu.write(registers.getAccumulator(), n);
                 break;
             case -1:
-                registers.State = enumState.InvalidMemory;
+                registers.setState(enumState.InvalidMemory);
                 break;
             default:
                 System.out.println("unknown code error");
@@ -158,67 +160,66 @@ public class CPU {
     private void ARMX(int n) {
         switch (mmu.check(n)) {
             case 0:
-                registers.State = enumState.PageFault;
+                registers.setState(enumState.PageFault);
                 break;
             case 1:
                 switch (mmu.check(mmu.read(n))) {
                     case 0:
-                        registers.State = enumState.PageFault;
+                        registers.setState(enumState.PageFault);
                         break;
                     case 1:
-                        mmu.write(registers.Accumulator, mmu.read(n));
+                        mmu.write(registers.getAccumulator(), mmu.read(n));
                         break;
                     case -1:
-                        registers.State = enumState.InvalidMemory;
+                        registers.setState(enumState.InvalidMemory);
                         break;
                     default:
-                        registers.State = enumState.InvalidMemory;
+                        registers.setState(enumState.InvalidMemory);
                         System.out.println("unknown code error");
                 }
                 break;
             case -1:
-                registers.State = enumState.InvalidMemory;
+                registers.setState(enumState.InvalidMemory);
                 break;
             default:
-                registers.State = enumState.InvalidMemory;
+                registers.setState(enumState.InvalidMemory);
                 System.out.println("unknown code error");
         }
     }
     private void SOMA(int n) {
         switch (mmu.check(n)) {
             case 0:
-                registers.State = enumState.PageFault;
+                registers.setState(enumState.PageFault);
                 break;
             case 1:
-                registers.Accumulator += mmu.read(n);
+                registers.setAccumulator(registers.getAccumulator() + mmu.read(n));
                 break;
             case -1:
-                registers.State = enumState.InvalidMemory;
+                registers.setState(enumState.InvalidMemory);
                 break;
             default:
                 System.out.println("unknown code error");
         }
     }
     private void NEG() {
-        registers.Accumulator *= -1;
+        this.registers.setAccumulator(this.registers.getAccumulator()*-1);
     }
     private void DESVZ(int n) {
-        if ( registers.Accumulator == 0 ) {
-            registers.PC = n;
-        }
+        if ( registers.getAccumulator() == 0 )
+            registers.setPC(n);
     }
     private void PARA() {
-        registers.State = enumState.Stop;
+        registers.setState(enumState.Stop);
     }
     private void LE(int n) {
-        registers.State = enumState.InvalidInstructions;
+        registers.setState(enumState.InvalidInstructions);
     }
     private void GRAVA(int n) {
-        registers.State = enumState.InvalidInstructions;
+        registers.setState(enumState.InvalidInstructions);
     }
     private void ERROR() {
-        registers.State = enumState.InvalidInstructions;
-        registers.PC--;
+        registers.setState(enumState.InvalidInstructions);
+        this.registers.setPC(this.registers.getPC() - 1);
     }
 
     private interface instruction {
@@ -250,24 +251,24 @@ public class CPU {
     public int execute() {
         if(isCpuStop())
             return enumStatus.Stop.getStatus();
-        if (registers.PC >= memoryInstructions.size()) {
-            registers.State = enumState.InvalidInstructions;
+        if (registers.getPC() >= memoryInstructions.size()) {
+            registers.setState(enumState.InvalidInstructions);
             return enumStatus.Error.getStatus();
         }
 
-        Tuple<Integer, Integer> aux = memoryInstructions.get(registers.PC);
+        Tuple<Integer, Integer> aux = memoryInstructions.get(registers.getPC());
 
         int inst = aux.getX();
         Object arg = aux.getY();
 
-        System.out.println("Instruction " + registers.PC + ": " + enumCommands.values()[inst] + " " + (arg == null ? "" : arg));
+        System.out.println("Instruction " + registers.getPC() + ": " + enumCommands.values()[inst] + " " + (arg == null ? "" : arg));
 
-        registers.PC++;
+        registers.setPC(registers.getPC() + 1);
         getInstruction[inst].execute(arg);
 
-        if (registers.State == enumState.InvalidInstructions || registers.State == enumState.PageFault)
+        if (registers.getState() == enumState.InvalidInstructions || registers.getState() == enumState.PageFault)
             return enumStatus.Syscall.getStatus();
-        if (registers.State == enumState.InvalidMemory)
+        if (registers.getState() == enumState.InvalidMemory)
             return enumStatus.Error.getStatus();
         if(isCpuStop())
             return enumStatus.Stop.getStatus();
@@ -279,9 +280,9 @@ public class CPU {
         memoryInstructions.clear();
         setSizeProgram();
 
-        registers.PC = 0;
-        registers.Accumulator=0;
-        registers.State = enumState.Normal;
+        registers.setPC(0);
+        registers.setAccumulator(0);
+        registers.setState(enumState.Normal);
     }
 
     protected int getSizeProgram() { return sizeProgram; }
@@ -304,10 +305,10 @@ public class CPU {
     }
 
     public void setCpuState(enumState state) {
-        this.registers.State = state;
+        this.registers.setState(state);
     }
 
-    public boolean isCpuStop() { return registers.State != enumState.Normal; }
+    public boolean isCpuStop() { return registers.getState() != enumState.Normal; }
 
     // Save register into a file
     public void creteLog(String file) {
@@ -315,8 +316,8 @@ public class CPU {
 
             FileWriter myWriter = new FileWriter(file);
 
-            myWriter.write("PC: " + this.registers.PC + "\n");
-            myWriter.write("Accumulator: " + this.registers.Accumulator + "\n");
+            myWriter.write("PC: " + this.registers.getPC() + "\n");
+            myWriter.write("Accumulator: " + this.registers.getAccumulator() + "\n");
             myWriter.write("Memory: " + Arrays.toString(this.memory) + "\n");
 
             myWriter.close();
@@ -329,8 +330,8 @@ public class CPU {
 
     // Set CPU state back to normal, in case was a normal interruption, increment PC
     public void setCpuStopToNormal() {
-        if ( registers.State != enumState.Normal ) {
-            this.registers.State = enumState.Normal;
+        if ( registers.getState() != enumState.Normal ) {
+            this.registers.setState(enumState.Normal);
         }
     }
 
@@ -384,13 +385,13 @@ public class CPU {
     }
 
     public int getAccumulator() {
-        return registers.Accumulator;
+        return registers.getAccumulator();
     }
 
-    public void setAccumulator(int i) { this.registers.Accumulator = i; }
+    public void setAccumulator(int i) { this.registers.setAccumulator(i); }
 
     public int getPC() {
-        return registers.PC;
+        return registers.getPC();
     }
 
     public void setRegister(Registers reg) {
@@ -401,6 +402,6 @@ public class CPU {
         return registers;
     }
 
-    public enumState getState() { return registers.State; }
+    public enumState getState() { return registers.getState(); }
 
 }

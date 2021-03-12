@@ -1,15 +1,13 @@
-package com.system.entities;
+package com.system.entities.os;
 
+import com.system.entities.hardware.CPU;
+import com.system.entities.hardware.Registers;
 import com.system.handlers.Tuple;
-import com.system.handlers.enumCommands;
 import com.system.handlers.enumState;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import java.util.ArrayList;
-
-import static com.system.handlers.VarsMethods.mySplit;
-import static com.system.handlers.VarsMethods.tryEnum;
 
 public class Process {
 
@@ -117,7 +115,7 @@ public class Process {
         return memory;
     }
 
-    protected Registers getRegisters() {
+    public Registers getRegisters() {
         return this.registers;
     }
 
@@ -145,7 +143,7 @@ public class Process {
         return priority;
     }
 
-    public void setRegisters(Registers reg) {
+    protected void setRegisters(Registers reg) {
         this.registers = reg;
     }
 

@@ -1,4 +1,6 @@
-package com.system.entities;
+package com.system.entities.memory;
+
+import com.system.entities.hardware.PhysicalMemory;
 
 public class MMU {
 
