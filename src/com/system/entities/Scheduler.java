@@ -1,6 +1,5 @@
 package com.system.entities;
 
-import com.system.Main;
 import com.system.handlers.VarsMethods;
 import com.system.handlers.enumState;
 import org.json.simple.JSONArray;

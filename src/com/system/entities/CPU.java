@@ -12,7 +12,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Scanner;
-import java.util.Vector;
 
 import static com.system.handlers.VarsMethods.mySplit;
 import static com.system.handlers.VarsMethods.tryEnum;
@@ -92,7 +91,7 @@ public class CPU {
         registers.Accumulator = n;
     }
     private void CARGM(int n) {
-        if(n < memory.length)
+        if(/*n < memory.length*/)
             registers.Accumulator = memory[n];
         else
             registers.State = enumState.InvalidMemory;

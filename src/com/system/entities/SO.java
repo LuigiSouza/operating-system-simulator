@@ -31,7 +31,7 @@ public class SO {
     private int[] counter;
     private int[] cost;
 
-    private FisicMemory fisicMemory;
+    private PhysicalMemory physicalMemory;
     private MMU mmu;
 
     private void load_files(Process p) {

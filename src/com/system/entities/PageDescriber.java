@@ -1,6 +1,6 @@
 package com.system.entities;
 
-public class Page {
+public class PageDescriber {
 
     private final int id;
 
@@ -11,7 +11,7 @@ public class Page {
 
     private int frame = -1;
 
-    public Page(int id) {
+    public PageDescriber(int id) {
         this.id = id;
     }
 

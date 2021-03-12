@@ -1,34 +1,39 @@
 package com.system.entities;
 
-import java.util.ArrayList;
-
 public class MMU {
 
-    private class PagesTable {
-        ArrayList<Page> Pages;
-        private final int sizePage;
-        public PagesTable(int numPaginas, int tamPagina) {
-            Pages = new ArrayList<Page>();
-            for(int i=0; i<numPaginas; i++)
-                Pages.add(new Page(i));
-            this.sizePage = tamPagina;
-
-        }
-
-    }
-
     private PagesTable pagesTable;
-    private FisicMemory fisicMemory;
+    private final PhysicalMemory physicalMemory;
 
-    public MMU(FisicMemory fisicMemory) {
-        this.fisicMemory = fisicMemory;
+    public MMU(PhysicalMemory physicalMemory) {
+        this.physicalMemory = physicalMemory;
     }
 
     public int read(int index) {
-        return fisicMemory.read(index);
+        pagesTable.describersAccessed(index);
+        return physicalMemory.read(pagesTable.convert(index));
     }
 
     public void save(int data, int index) {
-        fisicMemory.change(data, index);
+        pagesTable.describersAccessed(index);
+        pagesTable.describersChanged(index);
+        physicalMemory.change(data, pagesTable.convert(index));
     }
+
+    public int check(int index) {
+
+        int sizeMemory = physicalMemory.getSize_memory();
+        int sizePage = physicalMemory.getSize_page();
+
+        int indexPage = index/sizePage;
+
+        if(!pagesTable.getPage(indexPage).isValid())
+            return 0;
+        else if (!pagesTable.getPage(indexPage).is_changeable() || index >= sizeMemory*sizePage)
+            return -1;
+
+        return 1;
+
+    }
+
 }
