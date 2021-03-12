@@ -2,6 +2,7 @@ package com.system.entities.os;
 
 import com.system.entities.hardware.CPU;
 import com.system.entities.hardware.Registers;
+import com.system.entities.memory.PagesTable;
 import com.system.handlers.Tuple;
 import com.system.handlers.enumState;
 import org.json.simple.JSONArray;
@@ -11,7 +12,7 @@ import java.util.ArrayList;
 
 public class Process {
 
-    private final int[] memory;
+    private final PagesTable pagesTable;
 
     protected boolean blocked = false;
     protected boolean ended = false;
@@ -48,8 +49,8 @@ public class Process {
         JSONObject jobObject = (JSONObject) obj.get("job");
 
         JSONArray inst = (JSONArray) jobObject.get("program");
-        priority = Double.parseDouble((String) jobObject.get("priority"));;
-        memory = new int[Integer.parseInt((String) jobObject.get("memory"))];
+        priority = Double.parseDouble((String) jobObject.get("priority"));
+        //memory = new int[Integer.parseInt((String) jobObject.get("memory"))];
 
         int sizeMem = Integer.parseInt((String) jobObject.get("IOSize"));
         JSONArray memObj = (JSONArray) jobObject.get("IO");
@@ -74,14 +75,20 @@ public class Process {
         inst.forEach(str -> CPU.insertInstruction((String) str, this.instructions, registers));
 
         sizeProgram = instructions.size();
+
+
+
+
+
+        pagesTable = new PagesTable(30, 2);
     }
 
     public void printAll() {
-
+        /*
         System.out.print("memory: ");
         for(int i : memory)
             System.out.print(i + " ");
-        System.out.println();
+        System.out.println();*/
 
         System.out.println("estado: " + registers.getState());
         System.out.println("prioridade: " + priority);
@@ -111,9 +118,7 @@ public class Process {
         }
     }
 
-    public int[] getMemory() {
-        return memory;
-    }
+    //public int[] getMemory() { return memory; }
 
     public Registers getRegisters() {
         return this.registers;
@@ -150,4 +155,6 @@ public class Process {
     protected void setPriority(double i) {
         this.priority = i;
     }
+
+    public PagesTable getPagesTable() { return pagesTable; }
 }

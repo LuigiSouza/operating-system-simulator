@@ -8,9 +8,9 @@ public class PhysicalMemory {
     private final int size_memory;
     private final int size_page;
     public PhysicalMemory(int size_memory, int size_page) {
-        this.size_memory = size_memory;
+        this.size_memory = size_memory; // numero de quadros
+        this.size_page = size_page; // tamanhos do quadro
         memory = new int[size_memory*size_page];
-        this.size_page = size_page;
     }
 
     public int read(int index) {
@@ -22,11 +22,11 @@ public class PhysicalMemory {
         return Arrays.copyOfRange(memory, index, index+size_page);
     }
 
-    public void change(int data,int index) {
+    public void write(int data, int index) {
         memory[index] = data;
     }
 
-    public void change_page(int[] data_page, int index) {
+    public void write_page(int[] data_page, int index) {
         for(int i = index*size_page, j=0; i<index*size_page+size_page; i++,j++)
             memory[i] = data_page[j];
     }

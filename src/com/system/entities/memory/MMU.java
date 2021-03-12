@@ -11,6 +11,10 @@ public class MMU {
         this.physicalMemory = physicalMemory;
     }
 
+    public void changePagesTable(PagesTable pagesTable) {
+        this.pagesTable = pagesTable;
+    }
+
     public int read(int index) {
         pagesTable.describersAccessed(index);
         return physicalMemory.read(pagesTable.convert(index));
@@ -19,7 +23,7 @@ public class MMU {
     public void write(int data, int index) {
         pagesTable.describersAccessed(index);
         pagesTable.describersChanged(index);
-        physicalMemory.change(data, pagesTable.convert(index));
+        physicalMemory.write(data, pagesTable.convert(index));
     }
 
     public int check(int index) {

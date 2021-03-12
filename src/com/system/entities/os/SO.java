@@ -4,6 +4,8 @@ import com.system.entities.hardware.Timer;
 import com.system.entities.hardware.CPU;
 import com.system.entities.memory.MMU;
 import com.system.entities.hardware.PhysicalMemory;
+import com.system.entities.memory.PageDescriber;
+import com.system.entities.memory.PagesTable;
 import com.system.handlers.VarsMethods;
 import com.system.handlers.enumCommands;
 import com.system.handlers.enumState;
@@ -11,6 +13,7 @@ import com.system.handlers.enumStatus;
 
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Arrays;
 
 import static com.system.handlers.VarsMethods.initial_quantum;
 
@@ -24,7 +27,7 @@ public class SO {
 
     private static int quantum = initial_quantum;
 
-    private Controller self_controller;
+    private final Controller self_controller;
 
     public int read_call = 0;
     public int write_call = 0;
@@ -35,8 +38,12 @@ public class SO {
     private int[] counter;
     private int[] cost;
 
+    // fst: stores job; snd: stores page
+    private int[][] mapPhysicalMemory;
     private PhysicalMemory physicalMemory;
     private MMU mmu;
+
+    private int[][] secondaryMemory;
 
     private void load_files(Process p) {
         IO = p.getIO();
@@ -49,7 +56,18 @@ public class SO {
 
         scheduler = new Scheduler(str);
 
+        physicalMemory = new PhysicalMemory(60, 2);
+
+        mapPhysicalMemory = new int[physicalMemory.getSize_memory()][2];
+        secondaryMemory = new int[scheduler.getJobSize()][30*2];
+
+        mmu = new MMU(physicalMemory);
+
+        cpu = new CPU(mmu);
+
         load_new_cpu();
+
+        load_first_process(scheduler.getCurrentProcess(), scheduler.getProcessControl());
 
         load_files(scheduler.getCurrentProcess());
 
@@ -59,7 +77,7 @@ public class SO {
 
         self_controller.run();
 
-        end(out);
+        //end(out);
 
     }
 
@@ -121,7 +139,7 @@ public class SO {
 
             if (scheduler.nextJob() > -1) {
                 scheduler.getCurrentProcess().times_lost++;
-                System.out.println("perdseu");
+                System.out.println("-- Perdeu CPU --");
 
                 load_new_cpu();
 
@@ -180,12 +198,31 @@ public class SO {
 
     private void load_new_cpu() {
         scheduler.loadNext();
-        this.cpu = new CPU(scheduler.getCurrentProcess());
+        this.cpu.loadJob(scheduler.getCurrentProcess());
         if (cpu.getState() != enumState.InvalidInstructions && cpu.getState() != enumState.InvalidMemory)
             cpu.setCpuState(enumState.Normal);
         load_files(scheduler.getCurrentProcess());
 
         System.out.printf("\nCPU: %d: \n", scheduler.getProcessControl());
+    }
+
+    private void load_first_process(Process job, int id) {
+        /*int i = 0;
+        for(PageDescriber page : job.getPagesTable().getPageDescribers()) {
+            if(i >= mapPhysicalMemory.length)
+                return;
+            page.setFrame(i);
+            page.setValid(true);
+
+            mapPhysicalMemory[i][0] = id;
+            mapPhysicalMemory[i][1] = page.getId();
+            i++;
+        }*/
+        for (int i = 0; i < mapPhysicalMemory.length; i++){
+            mapPhysicalMemory[i][0] = -1;
+            mapPhysicalMemory[i][1] = -1;
+        }
+        mmu.changePagesTable(job.getPagesTable());
     }
 
     // Save instructions into a file

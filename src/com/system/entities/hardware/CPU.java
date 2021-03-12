@@ -35,23 +35,17 @@ public class CPU {
      */
     private ArrayList<Tuple<Integer, Integer>> memoryInstructions = new ArrayList<>();
 
-
+    public CPU(MMU mmu){
+        this.mmu = mmu;
+    }
     // Setup empty CPU based on register
-    public CPU (Registers reg) {
+    public CPU (Registers reg, MMU mmu) {
         this.registers.setPC(reg.getPC());
         this.registers.setState(reg.getState());
         this.registers.setAccumulator(reg.getAccumulator());
     }
 
-    public CPU (Process job, MMU mmu) {
-        this.memory = job.getMemory();
-        this.registers = job.getRegisters();
-        this.registers.setState(job.getState());
-        this.memoryInstructions = job.getInstructions();
-        this.mmu = mmu;
-    }
-
-    public CPU (Process job) {
+    public void loadJob(Process job) {
         this.memory = job.getMemory();
         this.registers = job.getRegisters();
         this.registers.setState(job.getState());

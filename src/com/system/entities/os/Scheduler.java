@@ -59,6 +59,12 @@ public class Scheduler {
         Jobs[processControl].printAll();
     }
 
+    public int getJobSize() { return Jobs.length; }
+
+    public int getCurrentJobIndex() {
+        return next_job;
+    }
+
     public Process getCurrentProcess() {
         if (Jobs[processControl].date_release < 0) {
             Jobs[processControl].date_release = SO.timer.getTimer();
