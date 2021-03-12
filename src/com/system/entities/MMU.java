@@ -14,7 +14,7 @@ public class MMU {
         return physicalMemory.read(pagesTable.convert(index));
     }
 
-    public void save(int data, int index) {
+    public void write(int data, int index) {
         pagesTable.describersAccessed(index);
         pagesTable.describersChanged(index);
         physicalMemory.change(data, pagesTable.convert(index));

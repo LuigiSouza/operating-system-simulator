@@ -41,6 +41,14 @@ public class CPU {
         this.registers.Accumulator = reg.getAccumulator();
     }
 
+    public CPU (Process job, MMU mmu) {
+        this.memory = job.getMemory();
+        this.registers = job.getRegisters();
+        this.registers.State = job.getState();
+        this.memoryInstructions = job.getInstructions();
+        this.mmu = mmu;
+    }
+
     public CPU (Process job) {
         this.memory = job.getMemory();
         this.registers = job.getRegisters();
@@ -91,42 +99,105 @@ public class CPU {
         registers.Accumulator = n;
     }
     private void CARGM(int n) {
-        if(/*n < memory.length*/)
-            registers.Accumulator = memory[n];
-        else
-            registers.State = enumState.InvalidMemory;
+        switch (mmu.check(n)) {
+            case 0:
+                registers.State = enumState.PageFault;
+                break;
+            case 1:
+                registers.Accumulator = mmu.read(n);
+                break;
+            case -1:
+                registers.State = enumState.InvalidMemory;
+                break;
+            default:
+                System.out.println("unknown code error");
+        }
     }
     private void CARGX(int n) {
-        if(n < memory.length) {
-            int aux = memory[n];
-            if (aux < memory.length) {
-                registers.Accumulator = memory[memory[n]];
-                return;
-            }
+        switch (mmu.check(n)) {
+            case 0:
+                registers.State = enumState.PageFault;
+                break;
+            case 1:
+                switch (mmu.check(mmu.read(n))) {
+                    case 0:
+                        registers.State = enumState.PageFault;
+                        break;
+                    case 1:
+                        registers.Accumulator = mmu.read(mmu.read(n));
+                        break;
+                    case -1:
+                        registers.State = enumState.InvalidMemory;
+                        break;
+                    default:
+                        System.out.println("unknown code error");
+                }
+                break;
+            case -1:
+                registers.State = enumState.InvalidMemory;
+                break;
+            default:
+                System.out.println("unknown code error");
         }
-        registers.State = enumState.InvalidMemory;
     }
     private void ARMM(int n) {
-        if(n < memory.length)
-            memory[n] = registers.Accumulator;
-        else
-            registers.State = enumState.InvalidMemory;
+        switch (mmu.check(n)) {
+            case 0:
+                registers.State = enumState.PageFault;
+                break;
+            case 1:
+                mmu.write(registers.Accumulator, n);
+                break;
+            case -1:
+                registers.State = enumState.InvalidMemory;
+                break;
+            default:
+                System.out.println("unknown code error");
+        }
     }
     private void ARMX(int n) {
-        if(n < memory.length) {
-            int aux = memory[n];
-            if (aux < memory.length) {
-                memory[memory[n]] = registers.Accumulator;
-                return;
-            }
+        switch (mmu.check(n)) {
+            case 0:
+                registers.State = enumState.PageFault;
+                break;
+            case 1:
+                switch (mmu.check(mmu.read(n))) {
+                    case 0:
+                        registers.State = enumState.PageFault;
+                        break;
+                    case 1:
+                        mmu.write(registers.Accumulator, mmu.read(n));
+                        break;
+                    case -1:
+                        registers.State = enumState.InvalidMemory;
+                        break;
+                    default:
+                        registers.State = enumState.InvalidMemory;
+                        System.out.println("unknown code error");
+                }
+                break;
+            case -1:
+                registers.State = enumState.InvalidMemory;
+                break;
+            default:
+                registers.State = enumState.InvalidMemory;
+                System.out.println("unknown code error");
         }
-        registers.State = enumState.InvalidMemory;
     }
     private void SOMA(int n) {
-        if(n < memory.length)
-            registers.Accumulator += memory[n];
-        else
-            registers.State = enumState.InvalidMemory;
+        switch (mmu.check(n)) {
+            case 0:
+                registers.State = enumState.PageFault;
+                break;
+            case 1:
+                registers.Accumulator += mmu.read(n);
+                break;
+            case -1:
+                registers.State = enumState.InvalidMemory;
+                break;
+            default:
+                System.out.println("unknown code error");
+        }
     }
     private void NEG() {
         registers.Accumulator *= -1;
@@ -194,7 +265,7 @@ public class CPU {
         registers.PC++;
         getInstruction[inst].execute(arg);
 
-        if (registers.State == enumState.InvalidInstructions)
+        if (registers.State == enumState.InvalidInstructions || registers.State == enumState.PageFault)
             return enumStatus.Syscall.getStatus();
         if (registers.State == enumState.InvalidMemory)
             return enumStatus.Error.getStatus();

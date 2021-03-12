@@ -17,8 +17,18 @@ public class PhysicalMemory {
         return memory[index];
     }
 
+    public int[] read_page(int i) {
+        int index = i*size_page;
+        return Arrays.copyOfRange(memory, index, index+size_page);
+    }
+
     public void change(int data,int index) {
         memory[index] = data;
+    }
+
+    public void change_page(int[] data_page, int index) {
+        for(int i = index*size_page, j=0; i<index*size_page+size_page; i++,j++)
+            memory[i] = data_page[j];
     }
 
     public int getSize_memory() {
