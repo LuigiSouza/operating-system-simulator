@@ -11,6 +11,15 @@ public class MMU {
         this.physicalMemory = physicalMemory;
     }
 
+    public PageDescriber getPage(int i) {
+        return pagesTable.getPage(i/physicalMemory.getSize_page());
+    }
+
+    public void setPagesTableChangeable() {
+        for (PageDescriber pag : pagesTable.getPageDescribers())
+            pag.setChangeable(true);
+    }
+
     public void changePagesTable(PagesTable pagesTable) {
         this.pagesTable = pagesTable;
     }
@@ -22,21 +31,25 @@ public class MMU {
 
     public void write(int data, int index) {
         pagesTable.describersAccessed(index);
-        pagesTable.describersChanged(index);
         physicalMemory.write(data, pagesTable.convert(index));
     }
 
     public int check(int index) {
 
         int sizeMemory = physicalMemory.getSize_memory();
-        int sizePage = physicalMemory.getSize_page();
 
-        int indexPage = index/sizePage;
-
-        if(!pagesTable.getPage(indexPage).isValid())
+        if(!getPage(index).isValid()) {
+            System.out.println("Page Fault");
             return 0;
-        else if (!pagesTable.getPage(indexPage).is_changeable() || index >= sizeMemory*sizePage)
+        }
+        else if (index >= sizeMemory * physicalMemory.getSize_page()) {
+            System.out.println("Out of bounds");
             return -1;
+        }
+        /*
+        * if(!getPage(index).is_changeable() || index >= sizeMemory * physicalMemory.getSize_page())
+        *   return -1;
+        */
 
         return 1;
 

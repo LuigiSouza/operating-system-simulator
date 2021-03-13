@@ -42,6 +42,7 @@ public class Controller {
                 update = SO.timer.dealInterruption();
             }
         }
+        System.out.println(!so.scheduler.isEnd() + " " +  !so.error()  + " " + (SO.timer.getTimer() < 500));
 
     }
 

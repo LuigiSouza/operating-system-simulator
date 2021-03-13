@@ -4,8 +4,9 @@ import java.util.Vector;
 
 public class VarsMethods {
 
-    public static final int initial_quantum = 5;
+    public static final int initial_quantum = 10;
 
+    // timer min heap
     public static final int max_pauses = 10;
 
     public static final int periodic_pause = -2;

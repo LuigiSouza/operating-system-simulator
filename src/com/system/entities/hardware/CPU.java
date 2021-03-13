@@ -23,7 +23,7 @@ public class CPU {
 
     private Registers registers;
 
-    private int[] memory;
+    //private int[] memory;
     private int sizeProgram;
 
     private MMU mmu;
@@ -46,7 +46,7 @@ public class CPU {
     }
 
     public void loadJob(Process job) {
-        this.memory = job.getMemory();
+        //this.memory = job.getMemory();
         this.registers = job.getRegisters();
         this.registers.setState(job.getState());
         this.memoryInstructions = job.getInstructions();
@@ -97,7 +97,7 @@ public class CPU {
     private void CARGM(int n) {
         switch (mmu.check(n)) {
             case 0:
-                registers.setState(enumState.PageFault);
+                setPageFault();
                 break;
             case 1:
                 registers.setAccumulator(mmu.read(n));
@@ -112,12 +112,12 @@ public class CPU {
     private void CARGX(int n) {
         switch (mmu.check(n)) {
             case 0:
-                registers.setState(enumState.PageFault);
+                setPageFault();
                 break;
             case 1:
                 switch (mmu.check(mmu.read(n))) {
                     case 0:
-                        registers.setState(enumState.PageFault);
+                        setPageFault();
                         break;
                     case 1:
                         registers.setAccumulator(mmu.read(mmu.read(n)));
@@ -139,7 +139,7 @@ public class CPU {
     private void ARMM(int n) {
         switch (mmu.check(n)) {
             case 0:
-                registers.setState(enumState.PageFault);
+                setPageFault();
                 break;
             case 1:
                 mmu.write(registers.getAccumulator(), n);
@@ -154,12 +154,12 @@ public class CPU {
     private void ARMX(int n) {
         switch (mmu.check(n)) {
             case 0:
-                registers.setState(enumState.PageFault);
+                setPageFault();
                 break;
             case 1:
                 switch (mmu.check(mmu.read(n))) {
                     case 0:
-                        registers.setState(enumState.PageFault);
+                        setPageFault();
                         break;
                     case 1:
                         mmu.write(registers.getAccumulator(), mmu.read(n));
@@ -183,7 +183,7 @@ public class CPU {
     private void SOMA(int n) {
         switch (mmu.check(n)) {
             case 0:
-                registers.setState(enumState.PageFault);
+                setPageFault();
                 break;
             case 1:
                 registers.setAccumulator(registers.getAccumulator() + mmu.read(n));
@@ -312,7 +312,7 @@ public class CPU {
 
             myWriter.write("PC: " + this.registers.getPC() + "\n");
             myWriter.write("Accumulator: " + this.registers.getAccumulator() + "\n");
-            myWriter.write("Memory: " + Arrays.toString(this.memory) + "\n");
+            //myWriter.write("Memory: " + Arrays.toString(this.memory) + "\n");
 
             myWriter.close();
 
@@ -378,6 +378,11 @@ public class CPU {
         }
     }
 
+    private void setPageFault() {
+        registers.setPC(this.getPC()-1);
+        setCpuState(enumState.PageFault);
+    }
+
     public int getAccumulator() {
         return registers.getAccumulator();
     }
@@ -386,14 +391,6 @@ public class CPU {
 
     public int getPC() {
         return registers.getPC();
-    }
-
-    public void setRegister(Registers reg) {
-        this.registers = reg;
-    }
-
-    public Registers getRegisters() {
-        return registers;
     }
 
     public enumState getState() { return registers.getState(); }

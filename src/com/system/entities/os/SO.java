@@ -39,8 +39,9 @@ public class SO {
     private int[] cost;
 
     // fst: stores job; snd: stores page
-    private int[][] mapPhysicalMemory;
-    private PhysicalMemory physicalMemory;
+    private PageDescriber[] mapPhysicalMemory;
+
+    public PhysicalMemory physicalMemory;
     private MMU mmu;
 
     private int[][] secondaryMemory;
@@ -58,7 +59,8 @@ public class SO {
 
         physicalMemory = new PhysicalMemory(60, 2);
 
-        mapPhysicalMemory = new int[physicalMemory.getSize_memory()][2];
+        //mapPhysicalMemory = new int[physicalMemory.getSize_memory()][2];
+        mapPhysicalMemory = new PageDescriber[physicalMemory.getSize_memory()];
         secondaryMemory = new int[scheduler.getJobSize()][30*2];
 
         mmu = new MMU(physicalMemory);
@@ -66,8 +68,6 @@ public class SO {
         cpu = new CPU(mmu);
 
         load_new_cpu();
-
-        load_first_process(scheduler.getCurrentProcess(), scheduler.getProcessControl());
 
         load_files(scheduler.getCurrentProcess());
 
@@ -77,7 +77,7 @@ public class SO {
 
         self_controller.run();
 
-        //end(out);
+        end(out);
 
     }
 
@@ -90,14 +90,38 @@ public class SO {
     }
 
     protected void change_process(int interruption) {
+        // Deal Stop Instruction
         if (cpu.getState() == enumState.Stop && !scheduler.getCurrentProcess().ended) {
+            System.out.println("Stop");
             stop_call++;
             scheduler.setJobEnd();
             cpu.setCpuState(enumState.Sleep);
             if(scheduler.getCurrentProcess().date_end < 0)
                 scheduler.getCurrentProcess().date_end = timer.getTimer();
         }
+        // Deal Page Fault
+        else if (cpu.getState() == enumState.PageFault) {
+            int i;
+            for(i = 0; i < mapPhysicalMemory.length; i++ ) {
+                if(mapPhysicalMemory[i] == null)
+                    break;
+            }
+            if(i == mapPhysicalMemory.length)
+                System.out.println("Tudo Cheio");
+            else {
+                int arg = cpu.getInstruction(cpu.getPC()).getY();
+                mapPhysicalMemory[i] = mmu.getPage(arg);
+                mapPhysicalMemory[i].setValid(true);
+                mapPhysicalMemory[i].setChangeable(false);
+                mapPhysicalMemory[i].setFrame(i);
+
+                cpu.setCpuState(enumState.Sleep);
+                timer.setInterruption(2, scheduler.getProcessControl());
+            }
+        }
+        // Deal Syscall
         else if(interruption == enumStatus.Syscall.getStatus()){
+            System.out.println("Syscall");
 
             int arg = cpu.getInstruction(cpu.getPC()-1).getY();
             cpu.setCpuState(enumState.Sleep);
@@ -109,10 +133,13 @@ public class SO {
             else {
                 errors_call++;
                 cpu.setCpuState(enumState.InvalidInstructions);
+                System.out.println("Instrução Invalida");
                 return;
             }
-            if(cpu.getState() == enumState.InvalidMemory)
+            if(cpu.getState() == enumState.InvalidMemory) {
+                System.out.println("Leitura de Memoria Invalida");
                 return;
+            }
             timer.setInterruption(cost[arg], scheduler.getProcessControl());
             scheduler.getCurrentProcess().time_blocked += cost[arg];
         }
@@ -203,26 +230,10 @@ public class SO {
             cpu.setCpuState(enumState.Normal);
         load_files(scheduler.getCurrentProcess());
 
-        System.out.printf("\nCPU: %d: \n", scheduler.getProcessControl());
-    }
+        mmu.changePagesTable(scheduler.getCurrentProcess().getPagesTable());
+        mmu.setPagesTableChangeable();
 
-    private void load_first_process(Process job, int id) {
-        /*int i = 0;
-        for(PageDescriber page : job.getPagesTable().getPageDescribers()) {
-            if(i >= mapPhysicalMemory.length)
-                return;
-            page.setFrame(i);
-            page.setValid(true);
-
-            mapPhysicalMemory[i][0] = id;
-            mapPhysicalMemory[i][1] = page.getId();
-            i++;
-        }*/
-        for (int i = 0; i < mapPhysicalMemory.length; i++){
-            mapPhysicalMemory[i][0] = -1;
-            mapPhysicalMemory[i][1] = -1;
-        }
-        mmu.changePagesTable(job.getPagesTable());
+        System.out.printf("\nCarregou CPU: %d: \n", scheduler.getProcessControl());
     }
 
     // Save instructions into a file
