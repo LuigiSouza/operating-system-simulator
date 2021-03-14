@@ -23,6 +23,8 @@ public class Process {
 
     private Registers registers;
 
+    private int interruptions = 0;
+
     // Benchmark
     protected int date_release = -1;
     protected int date_end = -1;
@@ -115,6 +117,17 @@ public class Process {
     }
 
     //public int[] getMemory() { return memory; }
+
+    public void addInterruption() {
+        this.interruptions++;
+    }
+    protected void subInterruption() {
+        this.interruptions--;
+    }
+    protected int getInterruption() {
+        return this.interruptions;
+    }
+
 
     public Registers getRegisters() {
         return this.registers;

@@ -2,6 +2,7 @@ package com.system.entities.hardware;
 
 import com.system.handlers.MinHeap;
 import com.system.handlers.VarsMethods;
+import com.system.entities.os.Process;
 
 import static com.system.handlers.VarsMethods.initial_quantum;
 
@@ -39,7 +40,8 @@ public class Timer {
     }
 
 
-    public void setInterruption(int i, int pause) {
+    public void setInterruption(int i, int pause, Process job) {
+        job.addInterruption();
         this.interruption.insert(this.timer + i, pause);
     }
 

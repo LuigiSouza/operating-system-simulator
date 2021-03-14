@@ -76,7 +76,23 @@ public class Scheduler {
         return end;
     }
 
-    public void unlockProcess(int i) {
+
+    public void deal_interruption(int update) {
+
+        Jobs[update].subInterruption();
+
+        if(Jobs[update].getInterruption() > 0)
+            return;
+
+        setProcessNormal(update);
+        unlockProcess(update);
+    }
+
+    private void setProcessNormal(int i) {
+        this.Jobs[i].getRegisters().setState(enumState.Normal);
+    }
+
+    private void unlockProcess(int i) {
         Jobs[i].blocked = false;
     }
 
@@ -132,10 +148,6 @@ public class Scheduler {
         Jobs[processControl].ended = true;
     }
 
-    public void setProcessNormal(int i) {
-        this.Jobs[i].getRegisters().setState(enumState.Normal);
-    }
-
     public void printResults() {
         for(int i = 0; i < Jobs.length; i++) {
             Process job = Jobs[i];
@@ -150,6 +162,17 @@ public class Scheduler {
             VarsMethods.output += "Vezes Escalonado: " + job.times_schedule + "\n";
             VarsMethods.output += "Numero de vezes que a CPU foi perdida: " + job.times_lost + "\n";
             preemption_times += job.times_lost;
+        }
+    }
+
+    public void print_Jobs_IO() {
+        for(Process job : Jobs) {
+            System.out.println("JOBS IO:");
+            int[][] IO = job.getIO();
+            for (int[] i : IO) {
+                for (int j : i) System.out.print(j + " ");
+                System.out.println("");
+            }
         }
     }
 }

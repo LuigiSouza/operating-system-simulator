@@ -36,12 +36,12 @@ public class Controller {
                 if (update == VarsMethods.periodic_pause)
                     so.deal_periodic();
                 else if (update > -1) {
-                    so.scheduler.setProcessNormal(update);
-                    so.scheduler.unlockProcess(update);
+                    so.scheduler.deal_interruption(update);
                 }
                 update = SO.timer.dealInterruption();
             }
         }
+        so.printOut();
         System.out.println(!so.scheduler.isEnd() + " " +  !so.error()  + " " + (SO.timer.getTimer() < 500));
 
     }
