@@ -10,8 +10,6 @@ import org.json.simple.parser.ParseException;
 import java.io.FileReader;
 import java.io.IOException;
 
-import static com.system.handlers.VarsMethods.initial_quantum;
-
 public class Scheduler {
 
     private Process[] Jobs;
@@ -27,10 +25,13 @@ public class Scheduler {
     protected int preemption_times = 0;
     // -------------
 
+    private final int initial_quantum;
 
     private boolean end = false;
 
-    public Scheduler(String str) {
+    public Scheduler(String str, int initial_quantum) {
+        this.initial_quantum = initial_quantum;
+
         //JSON parser object to parse read file
         JSONParser jsonParser = new JSONParser();
 

@@ -4,9 +4,9 @@ import com.system.handlers.MinHeap;
 import com.system.handlers.VarsMethods;
 import com.system.entities.os.Process;
 
-import static com.system.handlers.VarsMethods.initial_quantum;
-
 public class Timer {
+
+    public final int initial_quantum = 3;
 
     private int timer;
 

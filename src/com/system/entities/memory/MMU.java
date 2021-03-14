@@ -6,6 +6,7 @@ public class MMU {
 
     private PagesTable pagesTable;
     private final PhysicalMemory physicalMemory;
+    private int page_fault_error = -1;
 
     public MMU(PhysicalMemory physicalMemory) {
         this.physicalMemory = physicalMemory;
@@ -35,12 +36,17 @@ public class MMU {
         physicalMemory.write(data, pagesTable.convert(index));
     }
 
+    public int getPage_fault_error() {
+        return this.page_fault_error;
+    }
+
     public int check(int index) {
 
         int sizeMemory = physicalMemory.getSize_memory();
 
         if(!getPage(index).isValid()) {
             System.out.println("Page Fault");
+            page_fault_error = index;
             return 0;
         }
         else if (index >= sizeMemory * physicalMemory.getSize_page()) {

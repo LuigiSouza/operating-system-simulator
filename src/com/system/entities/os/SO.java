@@ -12,16 +12,15 @@ import com.system.handlers.enumStatus;
 
 import java.io.FileWriter;
 import java.io.IOException;
+import java.security.Provider;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Optional;
 
-import static com.system.handlers.VarsMethods.initial_quantum;
-
 public class SO {
 
     public static final int SIZE_MEM = 60;
-    public static final int SIZE_PAGE = 2;
+    public static final int SIZE_PAGE = 6;
     public static final int NUM_PAGE = 30;
     public static final int INTERRUPTION_WRITE = 2;
     public static final int INTERRUPTION_CLEAN = 2;
@@ -32,7 +31,7 @@ public class SO {
 
     protected static Timer timer;
 
-    private static int quantum = initial_quantum;
+    private static int quantum;
 
     private final Controller self_controller;
 
@@ -66,7 +65,8 @@ public class SO {
     public SO(String str, String out) {
         timer = new Timer();
 
-        scheduler = new Scheduler(str);
+        quantum = timer.initial_quantum;
+        scheduler = new Scheduler(str, quantum);
 
         physicalMemory = new PhysicalMemory(SIZE_MEM, SIZE_PAGE);
 
@@ -116,7 +116,7 @@ public class SO {
             if(mapPhysicalMemory[FIFO_Controller.get(i)] == null || mapPhysicalMemory[FIFO_Controller.get(i)].is_changeable()) {
                 index = FIFO_Controller.get(i);
                 FIFO_Controller.remove(i);
-                FIFO_Controller.add(0, index);
+                FIFO_Controller.add(index);
                 break;
             }
 
@@ -227,7 +227,7 @@ public class SO {
 
         int primary_memory = deal_FIFO();
 
-        int arg = cpu.getInstruction(cpu.getPC()).getY();
+        int arg = mmu.getPage_fault_error();
 
         mapPhysicalMemory[primary_memory] = mmu.getPage(arg);
         mapPhysicalMemory[primary_memory].setValid(true);
@@ -290,7 +290,7 @@ public class SO {
     }
 
     public void resetQuantum() {
-        quantum = initial_quantum;
+        quantum = timer.initial_quantum;
     }
 
     public static void subQuantum() {
@@ -373,4 +373,17 @@ public class SO {
         this.scheduler.print_Jobs_IO();
     }
 
+    public void printMemory(Process job) {
+        for(PageDescriber i : job.getPagesTable().getPageDescribers()) {
+            if (i.getFrame() != -1)
+                System.out.println("Frame: " + i.getFrame() + " " + Arrays.toString(physicalMemory.read_page(i.getFrame())));
+        }
+    }
+
+    public void printMemory() {
+        for(PageDescriber i : mapPhysicalMemory) {
+            if (i != null)
+            System.out.println("Frame: " + i.getFrame() + " " + Arrays.toString(physicalMemory.read_page(i.getFrame())));
+        }
+    }
 }
