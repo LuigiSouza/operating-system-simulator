@@ -14,10 +14,15 @@ import com.system.handlers.enumStatus;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.LinkedList;
 
 import static com.system.handlers.VarsMethods.initial_quantum;
 
 public class SO {
+
+    public static final int SIZE_MEM = 60;
+    public static final int SIZE_PAGE = 2;
+    public static final int NUM_PAGE = 30;
 
     protected final Scheduler scheduler;
 
@@ -44,6 +49,9 @@ public class SO {
     public PhysicalMemory physicalMemory;
     private MMU mmu;
 
+    private LinkedList<PageDescriber> FIFO_Controller2;
+    private int FIFO_Controller = 0;
+
     private int[][] secondaryMemory;
 
     private void load_files(Process p) {
@@ -57,11 +65,13 @@ public class SO {
 
         scheduler = new Scheduler(str);
 
-        physicalMemory = new PhysicalMemory(60, 2);
+        physicalMemory = new PhysicalMemory(SIZE_MEM, SIZE_PAGE);
 
         //mapPhysicalMemory = new int[physicalMemory.getSize_memory()][2];
         mapPhysicalMemory = new PageDescriber[physicalMemory.getSize_memory()];
-        secondaryMemory = new int[scheduler.getJobSize()][30*2];
+        secondaryMemory = new int[scheduler.getJobSize()][NUM_PAGE*SIZE_PAGE];
+
+        FIFO_Controller2 = new LinkedList<>();
 
         mmu = new MMU(physicalMemory);
 
@@ -89,6 +99,40 @@ public class SO {
         SaveFile(str);
     }
 
+    private void copy_fst_snd(int bgn, int end, int[] fst, int[] snd) {
+        for (int i = 0; bgn < end; bgn++, i++)
+            snd[bgn] = fst[i];
+    }
+
+    private void deal_FIFO(int index) {
+        System.out.println("Tudo Cheio");
+        int tmp = FIFO_Controller;
+        while(!mapPhysicalMemory[FIFO_Controller].is_changeable()) {
+
+            FIFO_Controller = ++FIFO_Controller >= mapPhysicalMemory.length ? 0 : FIFO_Controller;
+
+            if (FIFO_Controller == tmp) {
+                System.out.println("Perdemo");
+            }
+        }
+
+        if (mapPhysicalMemory[FIFO_Controller].was_changed()) {
+            // esvazia memoria principal
+            int id = mapPhysicalMemory[FIFO_Controller].getId();
+            copy_fst_snd(id, id+SIZE_PAGE, physicalMemory.read_page(FIFO_Controller), secondaryMemory[FIFO_Controller]);
+            mapPhysicalMemory[FIFO_Controller].setChanged(false);
+            mapPhysicalMemory[FIFO_Controller].setValid(false);
+            mapPhysicalMemory[FIFO_Controller].setChangeable(true);
+            mapPhysicalMemory[FIFO_Controller].setAccessed(false);
+            mapPhysicalMemory[FIFO_Controller].setFrame(-1);
+        }
+
+    }
+
+    private void deal_FIFO_withChance() {
+
+    }
+
     protected void change_process(int interruption) {
         // Deal Stop Instruction
         if (cpu.getState() == enumState.Stop && !scheduler.getCurrentProcess().ended) {
@@ -101,23 +145,28 @@ public class SO {
         }
         // Deal Page Fault
         else if (cpu.getState() == enumState.PageFault) {
-            int i;
-            for(i = 0; i < mapPhysicalMemory.length; i++ ) {
-                if(mapPhysicalMemory[i] == null)
+            int primary_memory;
+            for(primary_memory = 0; primary_memory < mapPhysicalMemory.length; primary_memory++ ) {
+                if(mapPhysicalMemory[primary_memory] == null)
                     break;
             }
-            if(i == mapPhysicalMemory.length)
-                System.out.println("Tudo Cheio");
-            else {
-                int arg = cpu.getInstruction(cpu.getPC()).getY();
-                mapPhysicalMemory[i] = mmu.getPage(arg);
-                mapPhysicalMemory[i].setValid(true);
-                mapPhysicalMemory[i].setChangeable(false);
-                mapPhysicalMemory[i].setFrame(i);
-
-                cpu.setCpuState(enumState.Sleep);
-                timer.setInterruption(2, scheduler.getProcessControl());
+            if(primary_memory == mapPhysicalMemory.length) {
+                deal_FIFO(primary_memory);
+                primary_memory = FIFO_Controller;
             }
+
+            int arg = cpu.getInstruction(cpu.getPC()).getY();
+            mapPhysicalMemory[primary_memory] = mmu.getPage(arg);
+            mapPhysicalMemory[primary_memory].setValid(true);
+            mapPhysicalMemory[primary_memory].setChangeable(false);
+            mapPhysicalMemory[primary_memory].setFrame(primary_memory);
+            int index = (arg/SIZE_PAGE)*SIZE_PAGE;
+            // preenche memória principal
+            physicalMemory.write_page(Arrays.copyOfRange(secondaryMemory[scheduler.getProcessControl()], index, index+SIZE_PAGE), primary_memory);
+
+            cpu.setCpuState(enumState.Sleep);
+            timer.setInterruption(2, scheduler.getProcessControl());
+
         }
         // Deal Syscall
         else if(interruption == enumStatus.Syscall.getStatus()){

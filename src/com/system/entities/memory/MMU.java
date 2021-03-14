@@ -31,6 +31,7 @@ public class MMU {
 
     public void write(int data, int index) {
         pagesTable.describersAccessed(index);
+        pagesTable.describersChanged(index);
         physicalMemory.write(data, pagesTable.convert(index));
     }
 

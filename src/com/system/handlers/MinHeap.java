@@ -87,17 +87,6 @@ public class MinHeap {
         }
     }
 
-    public void print()
-    {
-        for (int i = 1; i <= size / 2; i++) {
-            System.out.print(
-                    " PARENT : " + Heap[i].getX() + " " + Heap[i].getY()
-                            + " LEFT CHILD : " + (Heap[2 * i] != null ? (Heap[2 * i].getX() + " " + Heap[2 * i].getY()) : null)
-                            + " RIGHT CHILD :" + (Heap[2 * i + 1] != null ? (Heap[2 * i + 1].getX() + " " + Heap[2 * i + 1].getY()) : null));
-            System.out.println();
-        }
-    }
-
     public void remove_periodic() {
         int j = -1;
         for (int i = 1; i < size && j != i-1; i++) {

@@ -7,10 +7,10 @@ public class Registers {
     private int Accumulator;
     private enumState State;
 
-    public Registers(int pc,int A, enumState state) {
-        this.PC = pc;
-        this.Accumulator = A;
-        this.State = state;
+    public Registers() {
+        this.PC = 0;
+        this.Accumulator = 0;
+        this.State = enumState.Normal;
     }
 
     public void setState(enumState state) { this.State = state; }

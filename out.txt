@@ -1,5 +1,5 @@
 
-OS Total time: 27.4165ms
+OS Total time: 20.6897ms
 
 Benchmark Process 0:
 Hora de Inicio: 0

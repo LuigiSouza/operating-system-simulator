@@ -1,5 +1,7 @@
 package com.system.entities.memory;
 
+import com.system.entities.os.SO;
+
 import java.util.Arrays;
 
 public class PagesTable {

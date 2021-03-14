@@ -9,6 +9,9 @@ public class Timer {
 
     private int timer;
 
+    // timer min heap
+    private static final int max_pauses = 10;
+
     private int periodic_pause = 0;
 
     private final MinHeap interruption;
@@ -16,7 +19,7 @@ public class Timer {
 
     public Timer(){
         timer = 0;
-        interruption = new MinHeap(VarsMethods.max_pauses);
+        interruption = new MinHeap(max_pauses);
     }
 
     public int dealInterruption() {

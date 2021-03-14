@@ -44,7 +44,7 @@ public class Process {
 
     public Process(JSONObject obj) {
 
-        registers = new Registers(0, 0, enumState.Normal);
+        registers = new Registers();
 
         JSONObject jobObject = (JSONObject) obj.get("job");
 
@@ -76,11 +76,7 @@ public class Process {
 
         sizeProgram = instructions.size();
 
-
-
-
-
-        pagesTable = new PagesTable(30, 2);
+        pagesTable = new PagesTable(SO.NUM_PAGE, SO.SIZE_PAGE);
     }
 
     public void printAll() {
