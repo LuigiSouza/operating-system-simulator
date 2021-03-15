@@ -9,22 +9,19 @@ import com.system.handlers.VarsMethods;
 import com.system.handlers.enumCommands;
 import com.system.handlers.enumState;
 import com.system.handlers.enumStatus;
-import org.omg.PortableInterceptor.SYSTEM_EXCEPTION;
 
 import java.io.FileWriter;
 import java.io.IOException;
-import java.security.Provider;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Optional;
 
 public class SO {
-
-    public static final int SIZE_MEM = 20;
-    public static final int SIZE_PAGE = 2;
-    public static final int NUM_PAGE = 30;
-    public static final int INTERRUPTION_WRITE = 2;
-    public static final int INTERRUPTION_CLEAN = 2;
+    public static int SIZE_PAGE;
+    public static int NUM_PAGE;
+    public static int INTERRUPTION_WRITE;
+    public static int INTERRUPTION_CLEAN;
+    public static boolean SECOND_CHANCE;
+    private static int quantum;
 
     protected final Scheduler scheduler;
 
@@ -32,14 +29,12 @@ public class SO {
 
     protected static Timer timer;
 
-    private static int quantum;
+    private final Controller controller;
 
-    private final Controller self_controller;
-
-    public int read_call = 0;
-    public int write_call = 0;
-    public int errors_call = 0;
-    public int stop_call = 0;
+    private int read_call = 0;
+    private int write_call = 0;
+    private int errors_call = 0;
+    private int stop_call = 0;
 
     private int[][] IO;
     private int[] counter;
@@ -48,7 +43,7 @@ public class SO {
     // fst: stores job; snd: stores page
     private final PageDescriber[] mapPhysicalMemory;
 
-    public PhysicalMemory physicalMemory;
+    private final PhysicalMemory physicalMemory;
 
     private final MMU mmu;
 
@@ -56,22 +51,30 @@ public class SO {
 
     private final int[][] secondaryMemory;
 
-
     private void load_files(Process p) {
         IO = p.getIO();
         counter = p.getCounter();
         cost = p.getCost();
     }
 
-    public SO(String str, String out) {
-        timer = new Timer();
+    public SO(String str, int size_mem, int size_page, int num_page,
+              int interruption_write, int interruption_clean,
+              boolean second_chance, int initial_quantum)
+    {
+        SIZE_PAGE = size_page;
+        NUM_PAGE = num_page;
+        INTERRUPTION_WRITE = interruption_write;
+        INTERRUPTION_CLEAN = interruption_clean;
+        SECOND_CHANCE = second_chance;
+        quantum = initial_quantum;
 
-        quantum = timer.initial_quantum;
+
+        timer = new Timer(quantum);
+
         scheduler = new Scheduler(str, quantum);
 
-        physicalMemory = new PhysicalMemory(SIZE_MEM, SIZE_PAGE);
+        physicalMemory = new PhysicalMemory(size_mem, SIZE_PAGE);
 
-        //mapPhysicalMemory = new int[physicalMemory.getSize_memory()][2];
         mapPhysicalMemory = new PageDescriber[physicalMemory.getSize_memory()];
         secondaryMemory = new int[scheduler.getJobSize()][NUM_PAGE*SIZE_PAGE];
 
@@ -89,15 +92,15 @@ public class SO {
 
         timer.setPeriodic();
 
-        self_controller = new Controller(this);
-
-        self_controller.run();
-
-        end(out);
+        controller = new Controller(this);
 
     }
 
-    private void end(String str) {
+    public void run() {
+        controller.run();
+    }
+
+    public void printBench(String str) {
         if(!error())
             print_bench();
         else
@@ -112,9 +115,6 @@ public class SO {
             System.out.print( "'" + snd[bgn] + "' ");
         }
         System.out.println("]");
-
-    }
-    private void deal_FIFO_withChance() {
 
     }
 
@@ -147,26 +147,34 @@ public class SO {
         }
     }
 
+    private void deal_page_fault() {
+
+        int primary_memory = deal_FIFO();
+
+        int arg = mmu.getPage_fault_error();
+
+        mapPhysicalMemory[primary_memory] = mmu.getPage(arg);
+        mapPhysicalMemory[primary_memory].setValid(true);
+        mapPhysicalMemory[primary_memory].setChangeable(false);
+        mapPhysicalMemory[primary_memory].setFrame(primary_memory);
+
+
+        int index = (arg/SIZE_PAGE)*SIZE_PAGE;
+        // preenche memória principal
+        physicalMemory.write_page(Arrays.copyOfRange(secondaryMemory[scheduler.getProcessControl()], index, index+SIZE_PAGE), primary_memory);
+
+        cpu.setCpuState(enumState.Sleep);
+        timer.setInterruption(INTERRUPTION_WRITE, scheduler.getProcessControl(), scheduler.getCurrentProcess());
+
+    }
+
     private void deal_stop() {
         stop_call++;
         scheduler.setJobEnd();
         cpu.setCpuState(enumState.Sleep);
         if(scheduler.getCurrentProcess().date_end < 0)
             scheduler.getCurrentProcess().date_end = timer.getTimer();
-        free_map_primary(scheduler.getCurrentProcess());
-    }
-
-    private void free_map_primary(Process job) {
-        for(PageDescriber page : job.getPagesTable().getPageDescribers()) {
-            int frame = page.getFrame();
-
-            if (frame == -1)
-                continue;
-
-            FIFO_Controller.remove((Integer) frame);
-            FIFO_Controller.add(0, frame);
-            mapPhysicalMemory[frame] = null;
-        }
+        free_mapPhysicalMemory(scheduler.getCurrentProcess());
     }
 
     private void deal_syscall() {
@@ -192,17 +200,56 @@ public class SO {
         scheduler.getCurrentProcess().time_blocked += cost[arg];
     }
 
-    private int deal_FIFO() {
-        int index = -1;
+    private void free_mapPhysicalMemory(Process job) {
+        for(PageDescriber page : job.getPagesTable().getPageDescribers()) {
+            int frame = page.getFrame();
 
+            if (frame == -1)
+                continue;
+
+            FIFO_Controller.remove((Integer) frame);
+            FIFO_Controller.add(0, frame);
+            mapPhysicalMemory[frame] = null;
+        }
+    }
+
+    private int default_FIFO() {
         for(int i = 0; i < FIFO_Controller.size(); i++) {
             if (mapPhysicalMemory[FIFO_Controller.get(i)] == null || mapPhysicalMemory[FIFO_Controller.get(i)].is_changeable()) {
-                index = FIFO_Controller.get(i);
-                FIFO_Controller.remove(i);
-                FIFO_Controller.add(index);
-                break;
+                int index = FIFO_Controller.get(i);
+                FIFO_Controller.add(FIFO_Controller.remove(i));
+                return index;
             }
         }
+        return -1;
+    }
+
+    private int deal_FIFO_withChance() {
+        PageDescriber page;
+        for(int i = 0; i < FIFO_Controller.size(); i++) {
+            page = mapPhysicalMemory[FIFO_Controller.get(i)];
+            if(page == null) {
+                int ret = FIFO_Controller.remove(i);
+                FIFO_Controller.add(ret);
+                return ret;
+            }
+            else if (page.is_changeable()) {
+                int ret = FIFO_Controller.remove(i);
+                FIFO_Controller.add(ret);
+                if (page.was_accessed()) {
+                    page.setAccessed(false);
+                    i--;
+                } else
+                    return ret;
+            }
+        }
+        return -1;
+    }
+
+    private int deal_FIFO() {
+
+        int index = SECOND_CHANCE ? deal_FIFO_withChance() : default_FIFO();
+        System.out.print(index);
 
         if(index == -1) {
             System.out.println("Perdemo");
@@ -230,29 +277,7 @@ public class SO {
         return index;
     }
 
-
-    private void deal_page_fault() {
-
-        int primary_memory = deal_FIFO();
-
-        int arg = mmu.getPage_fault_error();
-
-        mapPhysicalMemory[primary_memory] = mmu.getPage(arg);
-        mapPhysicalMemory[primary_memory].setValid(true);
-        mapPhysicalMemory[primary_memory].setChangeable(false);
-        mapPhysicalMemory[primary_memory].setFrame(primary_memory);
-
-
-        int index = (arg/SIZE_PAGE)*SIZE_PAGE;
-        // preenche memória principal
-        physicalMemory.write_page(Arrays.copyOfRange(secondaryMemory[scheduler.getProcessControl()], index, index+SIZE_PAGE), primary_memory);
-
-        cpu.setCpuState(enumState.Sleep);
-        timer.setInterruption(INTERRUPTION_WRITE, scheduler.getProcessControl(), scheduler.getCurrentProcess());
-
-    }
-
-    public void deal_periodic() {
+    protected void deal_periodic() {
         if (quantum == 0) {
             enumState temp = cpu.getState();
             cpu.setCpuState(enumState.Sleep);
@@ -298,7 +323,7 @@ public class SO {
         }
     }
 
-    public void resetQuantum() {
+    private void resetQuantum() {
         quantum = timer.initial_quantum;
     }
 
@@ -309,7 +334,6 @@ public class SO {
     public static int getQuantum() {
         return quantum;
     }
-
 
     public boolean error() {
         return (scheduler.getCurrentProcess().getState() == enumState.InvalidMemory ||
@@ -379,7 +403,9 @@ public class SO {
 
 
     public void printIO() {
+        System.out.println("");
         this.scheduler.print_Jobs_IO();
+        System.out.println("");
     }
 
     public void printMemory(Process job) {

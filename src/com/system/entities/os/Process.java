@@ -85,11 +85,6 @@ public class Process {
     }
 
     public void printAll() {
-        /*
-        System.out.print("memory: ");
-        for(int i : memory)
-            System.out.print(i + " ");
-        System.out.println();*/
 
         System.out.println("estado: " + registers.getState());
         System.out.println("prioridade: " + priority);
@@ -98,7 +93,7 @@ public class Process {
         System.out.println("size: " + sizeProgram);
         System.out.print("IO: ");
 
-        for(int j[] : IO)
+        for(int[] j : IO)
             for(int i : j)
             System.out.print(i + " ");
         System.out.println();

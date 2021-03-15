@@ -6,19 +6,17 @@ import com.system.entities.os.Process;
 
 public class Timer {
 
-    public final int initial_quantum = 3;
+    public int initial_quantum;
 
     private int timer;
 
     // timer min heap
     private static final int max_pauses = 10;
 
-    private int periodic_pause = 0;
-
     private final MinHeap interruption;
 
-
-    public Timer(){
+    public Timer(int initial_quantum){
+        this.initial_quantum = initial_quantum;
         timer = 0;
         interruption = new MinHeap(max_pauses);
     }
@@ -26,9 +24,8 @@ public class Timer {
     public int dealInterruption() {
         if(this.interruption.CheckMin().getX() != timer) return -1;
 
-        int ret = this.interruption.extractMin().getY();
         //System.out.println("Timer: '" + this.interruption.get(i) + "' interruption");
-        return ret;
+        return this.interruption.extractMin().getY();
     }
 
     public int getTimer() {
@@ -39,7 +36,6 @@ public class Timer {
         this.timer++;
     }
 
-
     public void setInterruption(int i, int pause, Process job) {
         job.addInterruption();
         this.interruption.insert(this.timer + i, pause);
@@ -47,7 +43,6 @@ public class Timer {
 
     public void setPeriodic() {
         this.interruption.remove_periodic();
-        this.periodic_pause = this.timer + initial_quantum;
-        this.interruption.insert(this.periodic_pause, VarsMethods.periodic_pause);
+        this.interruption.insert(this.timer + initial_quantum, VarsMethods.periodic_pause);
     }
 }

@@ -12,7 +12,6 @@ import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Scanner;
 
 import static com.system.handlers.VarsMethods.mySplit;
@@ -23,7 +22,6 @@ public class CPU {
 
     private Registers registers;
 
-    //private int[] memory;
     private int sizeProgram;
 
     private MMU mmu;
@@ -53,7 +51,7 @@ public class CPU {
         this.sizeProgram = memoryInstructions.size();
     }
 
-    public void insertInstruction(String[] myString) {
+    private void insertInstruction(String[] myString) {
         for(String str : myString)
             insertInstruction(str, this.memoryInstructions, registers);
         setSizeProgram();
@@ -279,9 +277,9 @@ public class CPU {
         registers.setState(enumState.Normal);
     }
 
-    protected int getSizeProgram() { return sizeProgram; }
+    public int getSizeProgram() { return sizeProgram; }
 
-    protected void setSizeProgram() { sizeProgram = memoryInstructions.size(); }
+    private void setSizeProgram() { sizeProgram = memoryInstructions.size(); }
 
     // Returns all instructions into String format
     public String getInstructionsToString() {
@@ -319,13 +317,6 @@ public class CPU {
         } catch (IOException e) {
             System.out.println("An error occurred in file create.");
             e.printStackTrace();
-        }
-    }
-
-    // Set CPU state back to normal, in case was a normal interruption, increment PC
-    public void setCpuStopToNormal() {
-        if ( registers.getState() != enumState.Normal ) {
-            this.registers.setState(enumState.Normal);
         }
     }
 

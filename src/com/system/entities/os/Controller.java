@@ -48,11 +48,11 @@ public class Controller {
         so.printSecMemory();
 
         if(so.scheduler.isEnd())
-            System.out.print("Successfully Finished");
+            System.out.println("--- Successfully Finished");
         else if(so.error())
-            System.out.print("Error Caught");
+            System.out.println("--- Error Caught");
         else if((SO.timer.getTimer() < TIMER_TOTAL))
-            System.out.print("Time Finished");
+            System.out.println("--- Time is Up");
 
     }
 

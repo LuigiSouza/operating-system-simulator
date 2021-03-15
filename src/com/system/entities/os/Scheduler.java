@@ -74,10 +74,9 @@ public class Scheduler {
         return Jobs[processControl];
     }
 
-    protected boolean isEnd() {
+    public boolean isEnd() {
         return end;
     }
-
 
     public void deal_interruption(int update) {
 
