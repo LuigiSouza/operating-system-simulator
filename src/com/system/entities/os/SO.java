@@ -9,6 +9,7 @@ import com.system.handlers.VarsMethods;
 import com.system.handlers.enumCommands;
 import com.system.handlers.enumState;
 import com.system.handlers.enumStatus;
+import org.omg.PortableInterceptor.SYSTEM_EXCEPTION;
 
 import java.io.FileWriter;
 import java.io.IOException;
@@ -105,8 +106,13 @@ public class SO {
     }
 
     private void copy_fst_snd(int bgn, int end, int[] fst, int[] snd) {
-        for (int i = 0; bgn < end; bgn++, i++)
+        System.out.print("Saving: [ ");
+        for (int i = 0; bgn < end; bgn++, i++) {
             snd[bgn] = fst[i];
+            System.out.print( "'" + snd[bgn] + "' ");
+        }
+        System.out.println("]");
+
     }
     private void deal_FIFO_withChance() {
 
@@ -208,8 +214,9 @@ public class SO {
 
         if (mapPhysicalMemory[index].was_changed()) {
             // esvazia memoria principal
-            int id = mapPhysicalMemory[index].getId();
-            copy_fst_snd(id, id+SIZE_PAGE, physicalMemory.read_page(index), secondaryMemory[scheduler.getProcessControl()]);
+            int id = mapPhysicalMemory[index].getId()*SIZE_PAGE;
+            System.out.println("Cleaning from id: " + id);
+            copy_fst_snd(id, id+SIZE_PAGE, physicalMemory.read_page(index), secondaryMemory[mapPhysicalMemory[index].getJob()]);
             mapPhysicalMemory[index].setChanged(false);
 
             timer.setInterruption(INTERRUPTION_WRITE+INTERRUPTION_CLEAN, scheduler.getProcessControl(), scheduler.getCurrentProcess());
@@ -230,14 +237,11 @@ public class SO {
 
         int arg = mmu.getPage_fault_error();
 
-        //System.out.println(primary_memory + " " + (arg/SIZE_PAGE)*SIZE_PAGE);
-        //System.out.println(mmu.getPage(arg));
         mapPhysicalMemory[primary_memory] = mmu.getPage(arg);
         mapPhysicalMemory[primary_memory].setValid(true);
         mapPhysicalMemory[primary_memory].setChangeable(false);
         mapPhysicalMemory[primary_memory].setFrame(primary_memory);
 
-        System.out.println("Frame: " +mapPhysicalMemory[primary_memory].getFrame() + " no " + primary_memory);
 
         int index = (arg/SIZE_PAGE)*SIZE_PAGE;
         // preenche memória principal
@@ -374,29 +378,34 @@ public class SO {
     }
 
 
-    public void printOut() {
+    public void printIO() {
         this.scheduler.print_Jobs_IO();
     }
 
     public void printMemory(Process job) {
+        System.out.println("");
         PageDescriber[] pag = job.getPagesTable().getPageDescribers();
-        for(int i = 0; i < pag.length; i++) {
-            if (pag[i].getFrame() != -1)
-                System.out.println("Frame: " + pag[i].getFrame() + " " + Arrays.toString(physicalMemory.read_page(pag[i].getFrame())));
+        for (PageDescriber pageDescriber : pag)
+            if (pageDescriber.getFrame() != -1)
+                System.out.println("Frame: " + pageDescriber.getFrame() + " " + Arrays.toString(physicalMemory.read_page(pageDescriber.getFrame())));
 
-        }
+        System.out.println(Arrays.toString(secondaryMemory[job.getId()]));
     }
 
     public void printMemory() {
-        for(PageDescriber i : mapPhysicalMemory) {
+        System.out.println("");
+        for(PageDescriber i : mapPhysicalMemory)
             if (i != null)
-            System.out.println("Frame: " + i.getFrame() + " " + Arrays.toString(physicalMemory.read_page(i.getFrame())));
-        }
+                System.out.println("Frame: " + i.getFrame() + " " + Arrays.toString(physicalMemory.read_page(i.getFrame())) + " job: " + i.getJob());
+            else
+                System.out.println("Empty");
+        System.out.println("");
     }
 
     public void printSecMemory() {
-        for (int[] sec : secondaryMemory) {
+        System.out.println("\nSecondary Memory:");
+        for (int[] sec : secondaryMemory)
             System.out.println(Arrays.toString(sec));
-        }
+        System.out.println("");
     }
 }

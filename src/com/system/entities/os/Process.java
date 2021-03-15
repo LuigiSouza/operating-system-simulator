@@ -13,6 +13,7 @@ import java.util.ArrayList;
 public class Process {
 
     private final PagesTable pagesTable;
+    private final int id;
 
     protected boolean blocked = false;
     protected boolean ended = false;
@@ -44,7 +45,9 @@ public class Process {
     private final int[] counter;
     private final int[] cost;
 
-    public Process(JSONObject obj) {
+    public Process(JSONObject obj, int id) {
+
+        this.id = id;
 
         registers = new Registers();
 
@@ -78,7 +81,7 @@ public class Process {
 
         sizeProgram = instructions.size();
 
-        pagesTable = new PagesTable(SO.NUM_PAGE, SO.SIZE_PAGE);
+        pagesTable = new PagesTable(SO.NUM_PAGE, SO.SIZE_PAGE, id);
     }
 
     public void printAll() {
@@ -128,6 +131,9 @@ public class Process {
         return this.interruptions;
     }
 
+    public int getId() {
+        return id;
+    }
 
     public Registers getRegisters() {
         return this.registers;

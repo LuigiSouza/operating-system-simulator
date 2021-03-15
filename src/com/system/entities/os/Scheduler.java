@@ -9,6 +9,7 @@ import org.json.simple.parser.ParseException;
 
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.Arrays;
 
 public class Scheduler {
 
@@ -44,7 +45,7 @@ public class Scheduler {
             Jobs = new Process[jobs.size()];
 
             for(int i = 0; i < jobs.size(); i++) {
-                Jobs[i] = new Process((JSONObject) jobs.get(i));
+                Jobs[i] = new Process((JSONObject) jobs.get(i), i);
             }
 
         } catch (IOException | ParseException e) {
@@ -141,10 +142,6 @@ public class Scheduler {
 
     }
 
-    public boolean isCurrent(int i) {
-        return Jobs[i] == getCurrentProcess();
-    }
-
     public void setJobEnd(){
         Jobs[processControl].ended = true;
     }
@@ -171,8 +168,7 @@ public class Scheduler {
             System.out.println("JOBS IO:");
             int[][] IO = job.getIO();
             for (int[] i : IO) {
-                for (int j : i) System.out.print(j + " ");
-                System.out.println("");
+                System.out.println(Arrays.toString(i));
             }
         }
     }

@@ -3,6 +3,7 @@ package com.system.entities.memory;
 public class PageDescriber {
 
     private final int id;
+    private final int idJob;
 
     private boolean is_valid = false;
     private boolean is_changeable = true;
@@ -11,8 +12,9 @@ public class PageDescriber {
 
     private int frame = -1;
 
-    public PageDescriber(int id) {
+    public PageDescriber(int id, int job) {
         this.id = id;
+        this.idJob = job;
     }
 
     public boolean isValid() {
@@ -47,5 +49,8 @@ public class PageDescriber {
     }
     public int getId() {
         return id;
+    }
+    public int getJob() {
+        return idJob;
     }
 }

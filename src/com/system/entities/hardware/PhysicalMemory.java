@@ -14,7 +14,7 @@ public class PhysicalMemory {
     }
 
     public int read(int index) {
-        System.out.println("read from " + index + " : " + memory[index]);
+        //System.out.println("Reading " + memory[index] + " from " + index + " address");
         return memory[index];
     }
 
@@ -24,7 +24,7 @@ public class PhysicalMemory {
     }
 
     public void write(int data, int index) {
-        System.out.println("write at " + index + " over " + memory[index] + " with " + data);
+        //System.out.println("Writing " + data + " at " + index + " address over " + memory[index]);
         memory[index] = data;
     }
 

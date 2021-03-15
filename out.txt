@@ -1,36 +1,36 @@
 
-OS Total time: 65.0769ms
+OS Total time: 57.0312ms
 
 Benchmark Process 0:
 Hora de Inicio: 0
-Hora de Termino: 832
-Tempo de Retorno: 832
-Tempo de CPU: 390
-Percentual de CPU: 42% em relacao ao timer
-Tempo Bloqueado: 48
-Vezes Bloqueado: 44
-Vezes Escalonado: 145
-Numero de vezes que a CPU foi perdida: 102
+Hora de Termino: 1131
+Tempo de Retorno: 1131
+Tempo de CPU: 529
+Percentual de CPU: 44% em relacao ao timer
+Tempo Bloqueado: 52
+Vezes Bloqueado: 54
+Vezes Escalonado: 188
+Numero de vezes que a CPU foi perdida: 135
 
 Benchmark Process 1:
 Hora de Inicio: 1
-Hora de Termino: 1008
-Tempo de Retorno: 1007
-Tempo de CPU: 528
-Percentual de CPU: 57% em relacao ao timer
+Hora de Termino: 1284
+Tempo de Retorno: 1283
+Tempo de CPU: 657
+Percentual de CPU: 55% em relacao ao timer
 Tempo Bloqueado: 84
-Vezes Bloqueado: 54
-Vezes Escalonado: 146
-Numero de vezes que a CPU foi perdida: 101
+Vezes Bloqueado: 63
+Vezes Escalonado: 189
+Numero de vezes que a CPU foi perdida: 132
 
 Resultados Gerais:
-Timer: 1008
-Tempo Ativo: 918
-Tempo Ocioso: 90
-Total de Chamadas do SO: 57
+Timer: 1284
+Tempo Ativo: 1186
+Tempo Ocioso: 98
+Total de Chamadas do SO: 58
 Chamada do tipo LE: 44
-Chamada do tipo GRAVA: 11
+Chamada do tipo GRAVA: 12
 Chamada do tipo STOP: 2
 Chamada do tipo Ilegal: 0
-Trocas de Processo: 291
-Numero de Preempsoes: 203
+Trocas de Processo: 377
+Numero de Preempsoes: 267
