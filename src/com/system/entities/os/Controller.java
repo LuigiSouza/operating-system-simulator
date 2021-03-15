@@ -27,7 +27,7 @@ public class Controller {
 
             if (pause == enumStatus.Next.getStatus() || pause == enumStatus.Syscall.getStatus()){
                 //so.printMemory();
-                //if(so.scheduler.getProcessControl() == 0) so.printMemory(so.scheduler.getCurrentProcess());
+                if(so.scheduler.getProcessControl() == 0) so.printMemory(so.scheduler.getCurrentProcess());
                 so.scheduler.getCurrentProcess().time_cpu++;
                 so.scheduler.time_cpu++;
                 SO.subQuantum();
@@ -44,9 +44,12 @@ public class Controller {
                 }
                 update = SO.timer.dealInterruption();
             }
+            //if(so.scheduler.getProcessControl() == 0) so.printMemory(so.scheduler.getCurrentProcess());
+
 
         }
         so.printOut();
+        so.printSecMemory();
         System.out.println(!so.scheduler.isEnd() + " " +  !so.error()  + " " + (SO.timer.getTimer() < TIMER_TOTAL));
 
     }

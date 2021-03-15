@@ -16,7 +16,7 @@ public class PagesTable {
 
     public int convert(int address) {
         // get Page given an index and convert to physical address in memory
-        return ((pageDescribers[address/sizePage].getFrame())*sizePage)+(address%sizePage);
+        return ((pageDescribers[address/sizePage*sizePage].getFrame())*sizePage)+(address%sizePage);
     }
 
     protected PageDescriber getPage(int index) {

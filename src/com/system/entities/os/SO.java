@@ -19,8 +19,8 @@ import java.util.Optional;
 
 public class SO {
 
-    public static final int SIZE_MEM = 60;
-    public static final int SIZE_PAGE = 6;
+    public static final int SIZE_MEM = 20;
+    public static final int SIZE_PAGE = 2;
     public static final int NUM_PAGE = 30;
     public static final int INTERRUPTION_WRITE = 2;
     public static final int INTERRUPTION_CLEAN = 2;
@@ -108,43 +108,6 @@ public class SO {
         for (int i = 0; bgn < end; bgn++, i++)
             snd[bgn] = fst[i];
     }
-
-    private int deal_FIFO() {
-        int index = -1;
-
-        for(int i = 0; i < FIFO_Controller.size(); i++)
-            if(mapPhysicalMemory[FIFO_Controller.get(i)] == null || mapPhysicalMemory[FIFO_Controller.get(i)].is_changeable()) {
-                index = FIFO_Controller.get(i);
-                FIFO_Controller.remove(i);
-                FIFO_Controller.add(index);
-                break;
-            }
-
-        if(index == -1) {
-            System.out.println("Perdemo");
-            return -1;
-        }
-
-        if(mapPhysicalMemory[index] == null)
-            return index;
-
-        if (mapPhysicalMemory[index].was_changed()) {
-            // esvazia memoria principal
-            int id = mapPhysicalMemory[index].getId();
-            copy_fst_snd(id, id+SIZE_PAGE, physicalMemory.read_page(index), secondaryMemory[index]);
-            mapPhysicalMemory[index].setChanged(false);
-
-            timer.setInterruption(INTERRUPTION_WRITE+INTERRUPTION_CLEAN, scheduler.getProcessControl(), scheduler.getCurrentProcess());
-        }
-
-        mapPhysicalMemory[index].setAccessed(false);
-        mapPhysicalMemory[index].setChangeable(true);
-        mapPhysicalMemory[index].setValid(false);
-        mapPhysicalMemory[index].setFrame(-1);
-
-        return index;
-    }
-
     private void deal_FIFO_withChance() {
 
     }
@@ -223,16 +186,58 @@ public class SO {
         scheduler.getCurrentProcess().time_blocked += cost[arg];
     }
 
+    private int deal_FIFO() {
+        int index = -1;
+
+        for(int i = 0; i < FIFO_Controller.size(); i++) {
+            if (mapPhysicalMemory[FIFO_Controller.get(i)] == null || mapPhysicalMemory[FIFO_Controller.get(i)].is_changeable()) {
+                index = FIFO_Controller.get(i);
+                FIFO_Controller.remove(i);
+                FIFO_Controller.add(index);
+                break;
+            }
+        }
+
+        if(index == -1) {
+            System.out.println("Perdemo");
+            return -1;
+        }
+
+        if(mapPhysicalMemory[index] == null)
+            return index;
+
+        if (mapPhysicalMemory[index].was_changed()) {
+            // esvazia memoria principal
+            int id = mapPhysicalMemory[index].getId();
+            copy_fst_snd(id, id+SIZE_PAGE, physicalMemory.read_page(index), secondaryMemory[scheduler.getProcessControl()]);
+            mapPhysicalMemory[index].setChanged(false);
+
+            timer.setInterruption(INTERRUPTION_WRITE+INTERRUPTION_CLEAN, scheduler.getProcessControl(), scheduler.getCurrentProcess());
+        }
+
+        mapPhysicalMemory[index].setAccessed(false);
+        mapPhysicalMemory[index].setChangeable(true);
+        mapPhysicalMemory[index].setValid(false);
+        mapPhysicalMemory[index].setFrame(-1);
+
+        return index;
+    }
+
+
     private void deal_page_fault() {
 
         int primary_memory = deal_FIFO();
 
         int arg = mmu.getPage_fault_error();
 
+        //System.out.println(primary_memory + " " + (arg/SIZE_PAGE)*SIZE_PAGE);
+        //System.out.println(mmu.getPage(arg));
         mapPhysicalMemory[primary_memory] = mmu.getPage(arg);
         mapPhysicalMemory[primary_memory].setValid(true);
         mapPhysicalMemory[primary_memory].setChangeable(false);
         mapPhysicalMemory[primary_memory].setFrame(primary_memory);
+
+        System.out.println("Frame: " +mapPhysicalMemory[primary_memory].getFrame() + " no " + primary_memory);
 
         int index = (arg/SIZE_PAGE)*SIZE_PAGE;
         // preenche memória principal
@@ -374,9 +379,11 @@ public class SO {
     }
 
     public void printMemory(Process job) {
-        for(PageDescriber i : job.getPagesTable().getPageDescribers()) {
-            if (i.getFrame() != -1)
-                System.out.println("Frame: " + i.getFrame() + " " + Arrays.toString(physicalMemory.read_page(i.getFrame())));
+        PageDescriber[] pag = job.getPagesTable().getPageDescribers();
+        for(int i = 0; i < pag.length; i++) {
+            if (pag[i].getFrame() != -1)
+                System.out.println("Frame: " + pag[i].getFrame() + " " + Arrays.toString(physicalMemory.read_page(pag[i].getFrame())));
+
         }
     }
 
@@ -384,6 +391,12 @@ public class SO {
         for(PageDescriber i : mapPhysicalMemory) {
             if (i != null)
             System.out.println("Frame: " + i.getFrame() + " " + Arrays.toString(physicalMemory.read_page(i.getFrame())));
+        }
+    }
+
+    public void printSecMemory() {
+        for (int[] sec : secondaryMemory) {
+            System.out.println(Arrays.toString(sec));
         }
     }
 }

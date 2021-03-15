@@ -13,7 +13,7 @@ public class MMU {
     }
 
     public PageDescriber getPage(int i) {
-        return pagesTable.getPage(i/physicalMemory.getSize_page());
+        return pagesTable.getPage(i/physicalMemory.getSize_page()*physicalMemory.getSize_page());
     }
 
     public void setPagesTableChangeable() {
@@ -33,6 +33,8 @@ public class MMU {
     public void write(int data, int index) {
         pagesTable.describersAccessed(index);
         pagesTable.describersChanged(index);
+        //System.out.println(pagesTable.getPage(index/physicalMemory.getSize_page()*physicalMemory.getSize_page()));
+        //System.out.println("index " +pagesTable.getPage((index/physicalMemory.getSize_page())).getFrame());
         physicalMemory.write(data, pagesTable.convert(index));
     }
 
@@ -44,6 +46,7 @@ public class MMU {
 
         int sizeMemory = physicalMemory.getSize_memory();
 
+        //System.out.println(index/physicalMemory.getSize_page()*physicalMemory.getSize_page());
         if(!getPage(index).isValid()) {
             System.out.println("Page Fault");
             page_fault_error = index;
