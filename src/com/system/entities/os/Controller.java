@@ -6,7 +6,7 @@ import com.system.handlers.enumStatus;
 
 public class Controller {
 
-    public static final int TIMER_TOTAL = 2000;
+    public static final int TIMER_TOTAL = 5000;
 
     private final SO so;
 
@@ -51,7 +51,7 @@ public class Controller {
             System.out.println("--- Successfully Finished");
         else if(so.error())
             System.out.println("--- Error Caught");
-        else if((SO.timer.getTimer() < TIMER_TOTAL))
+        else if((SO.timer.getTimer() >= TIMER_TOTAL))
             System.out.println("--- Time is Up");
 
     }

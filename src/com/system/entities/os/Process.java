@@ -36,10 +36,11 @@ public class Process {
     protected int times_schedule = 0;
     protected int times_lost = 0;
     protected int times_pageFault = 0;
+    protected int times_blocked_MissingPage;
 
     protected int time_blocked_pageFault = 0;
     protected int time_blocked_IO = 0;
-    protected int timeBlocked = 0;
+    protected int timeBlocked_missingPage = 0;
     protected int IOCalls = 0;
     // ----------------
 
@@ -117,8 +118,6 @@ public class Process {
             System.out.println(instructions.get(i).getY());
         }
     }
-
-    //public int[] getMemory() { return memory; }
 
     public void addInterruption() {
         this.interruptions++;

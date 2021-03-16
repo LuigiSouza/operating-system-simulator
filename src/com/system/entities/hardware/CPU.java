@@ -98,6 +98,7 @@ public class CPU {
                 setPageFault();
                 break;
             case 1:
+                mmu.setRead(n);
                 registers.setAccumulator(mmu.read(n));
                 break;
             case -1:
@@ -118,6 +119,8 @@ public class CPU {
                         setPageFault();
                         break;
                     case 1:
+                        mmu.setRead(n);
+                        mmu.setRead(mmu.read(n));
                         registers.setAccumulator(mmu.read(mmu.read(n)));
                         break;
                     case -1:
@@ -140,6 +143,7 @@ public class CPU {
                 setPageFault();
                 break;
             case 1:
+                mmu.setWrote(n);
                 mmu.write(registers.getAccumulator(), n);
                 break;
             case -1:
@@ -160,6 +164,8 @@ public class CPU {
                         setPageFault();
                         break;
                     case 1:
+                        mmu.setRead(n);
+                        mmu.setWrote(mmu.read(n));
                         mmu.write(registers.getAccumulator(), mmu.read(n));
                         break;
                     case -1:
@@ -184,6 +190,7 @@ public class CPU {
                 setPageFault();
                 break;
             case 1:
+                mmu.setRead(n);
                 registers.setAccumulator(registers.getAccumulator() + mmu.read(n));
                 break;
             case -1:

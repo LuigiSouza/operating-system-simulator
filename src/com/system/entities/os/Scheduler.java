@@ -146,23 +146,25 @@ public class Scheduler {
         Jobs[processControl].ended = true;
     }
 
-    public void printResults() {
+    public void printResults(int totalTimer) {
         for(int i = 0; i < Jobs.length; i++) {
             Process job = Jobs[i];
-            VarsMethods.output += "\nBenchmark Process " + i + ":\n";
+            //job.printAll();
+            VarsMethods.output += "\n---- Benchmark Process " + i + ": ---- \n";
             VarsMethods.output += "Hora de Inicio: " + job.date_release + "\n";
             VarsMethods.output += "Hora de Termino: " + job.date_end + "\n";
             VarsMethods.output += "Tempo de Retorno: " + (job.date_end - job.date_release) + "\n";
-            VarsMethods.output += "Tempo de CPU: " + job.time_cpu + "\n";
-            VarsMethods.output += "Percentual de CPU: " + (job.time_cpu*100/this.time_cpu) + "% em relacao ao timer\n";
+            VarsMethods.output += "Tempo de CPU: " + job.time_cpu + ", " + (job.time_cpu*100/totalTimer) + "%\n";
             VarsMethods.output += "Vezes Bloqueado: " + job.blocked_times + "\n";
             VarsMethods.output += "Vezes Escalonado: " + job.times_schedule + "\n";
             VarsMethods.output += "Falha de Pagina: " + job.times_pageFault + "\n";
+            VarsMethods.output += "Falta de Pagina: " + job.timeBlocked_missingPage + "\n";
             VarsMethods.output += "Chamadas de IO: " + job.IOCalls + "\n";
             VarsMethods.output += "Tempo bloqueado por PageFault: " + job.time_blocked_pageFault + "\n";
+            VarsMethods.output += "Tempo bloqueado por MissingPageFault: " + job.times_blocked_MissingPage + "\n";
             VarsMethods.output += "Tempo bloqueado por IO: " + job.time_blocked_IO + "\n";
-            VarsMethods.output += "Tempo Bloqueado: " + job.timeBlocked + "\n";
-            VarsMethods.output += "Tempo de espera na fila de escalonamento: " + (job.time_cpu - job.timeBlocked) + "\n";
+            VarsMethods.output += "Tempo Bloqueado: " + (job.time_blocked_IO + job.time_blocked_pageFault + job.times_blocked_MissingPage) + "\n";
+            VarsMethods.output += "Tempo de espera na fila de escalonamento: " + ((job.date_end - job.date_release) - (job.time_blocked_IO + job.time_blocked_pageFault + job.times_blocked_MissingPage)) + "\n";
             VarsMethods.output += "Numero de vezes que a CPU foi perdida (Quantum): " + job.times_lost + "\n";
             preemption_times += job.times_lost;
             pageFault_total += job.times_pageFault;
@@ -187,8 +189,8 @@ public class Scheduler {
         Jobs[next_job].time_blocked_pageFault += time;
     }
 
-    public void addTimeBlocked(int time) {
-        Jobs[next_job].timeBlocked += time;
+    public void addTimeMissingPage(int time) {
+        Jobs[next_job].times_blocked_MissingPage += time;
     }
 
     public void addTimeIO(int time) {
@@ -197,6 +199,10 @@ public class Scheduler {
 
     public void addPageFault() {
         Jobs[next_job].times_pageFault++;
+    }
+
+    public void addMissingPage() {
+        Jobs[next_job].times_blocked_MissingPage++;
     }
 
     public void addIOCalls() {

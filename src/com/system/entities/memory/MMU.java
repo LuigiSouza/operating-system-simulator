@@ -1,6 +1,7 @@
 package com.system.entities.memory;
 
 import com.system.entities.hardware.PhysicalMemory;
+import com.system.entities.os.SO;
 
 public class MMU {
 
@@ -13,7 +14,7 @@ public class MMU {
     }
 
     public PageDescriber getPage(int i) {
-        return pagesTable.getPage(i/physicalMemory.getSize_page());
+        return pagesTable.getPage(i);
     }
 
     public void setPagesTableChangeable() {
@@ -26,14 +27,22 @@ public class MMU {
     }
 
     public int read(int index) {
-        pagesTable.describersAccessed(index);
         return physicalMemory.read(pagesTable.convert(index));
     }
 
     public void write(int data, int index) {
         physicalMemory.write(data, pagesTable.convert(index));
+    }
+
+    public void setWrote(int index) {
         pagesTable.describersAccessed(index);
         pagesTable.describersChanged(index);
+        pagesTable.describersChangeable(index);
+    }
+
+    public void setRead(int index) {
+        pagesTable.describersChangeable(index);
+        pagesTable.describersAccessed(index);
     }
 
     public int getPage_fault_error() {
@@ -49,7 +58,7 @@ public class MMU {
             page_fault_error = index;
             return 0;
         }
-        else if (index >= sizeMemory * physicalMemory.getSize_page()) {
+        else if (index >= SO.SIZE_PAGE * SO.NUM_PAGE) {
             System.out.println("Out of bounds");
             return -1;
         }

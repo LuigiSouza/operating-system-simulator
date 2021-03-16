@@ -18,6 +18,7 @@ import java.util.Arrays;
 public class SO {
     public static int SIZE_PAGE;
     public static int NUM_PAGE;
+    public static int SIZE_MEM;
     public static int INTERRUPTION_WRITE;
     public static int INTERRUPTION_CLEAN;
     public static boolean SECOND_CHANCE;
@@ -63,6 +64,7 @@ public class SO {
     {
         SIZE_PAGE = size_page;
         NUM_PAGE = num_page;
+        SIZE_MEM = size_mem;
         INTERRUPTION_WRITE = interruption_write;
         INTERRUPTION_CLEAN = interruption_clean;
         SECOND_CHANCE = second_chance;
@@ -73,7 +75,7 @@ public class SO {
 
         scheduler = new Scheduler(str, quantum);
 
-        physicalMemory = new PhysicalMemory(size_mem, SIZE_PAGE);
+        physicalMemory = new PhysicalMemory(SIZE_MEM, SIZE_PAGE);
 
         mapPhysicalMemory = new PageDescriber[physicalMemory.getSize_memory()];
         secondaryMemory = new int[scheduler.getJobSize()][NUM_PAGE*SIZE_PAGE];
@@ -153,6 +155,14 @@ public class SO {
 
         int primary_memory = deal_FIFO();
 
+        if (primary_memory == -1) {
+            cpu.setCpuState(enumState.Sleep);
+            scheduler.addTimeMissingPage(timer.getNextInterruption());
+            scheduler.addMissingPage();
+            timer.setInterruption(timer.getNextInterruption(), scheduler.getProcessControl(), scheduler.getCurrentProcess());
+            return;
+        }
+
         int arg = mmu.getPage_fault_error();
 
         mapPhysicalMemory[primary_memory] = mmu.getPage(arg);
@@ -168,7 +178,6 @@ public class SO {
         cpu.setCpuState(enumState.Sleep);
         timer.setInterruption(INTERRUPTION_WRITE, scheduler.getProcessControl(), scheduler.getCurrentProcess());
         scheduler.addTimePageFault(INTERRUPTION_WRITE);
-        scheduler.addTimeBlocked(INTERRUPTION_WRITE);
     }
 
     private void deal_stop() {
@@ -202,7 +211,6 @@ public class SO {
         timer.setInterruption(cost[arg], scheduler.getProcessControl(), scheduler.getCurrentProcess());
 
         scheduler.addIOCalls();
-        scheduler.addTimeBlocked(cost[arg]);
         scheduler.addTimeIO(cost[arg]);
     }
 
@@ -255,10 +263,9 @@ public class SO {
     private int deal_FIFO() {
 
         int index = SECOND_CHANCE ? FIFO_with_second_Chance() : default_FIFO();
-        System.out.print(index);
 
         if(index == -1) {
-            System.out.println("Perdemo");
+            System.out.println("Todos quadros ocupados, inpossível liberar espaço...");
             return -1;
         }
 
@@ -268,13 +275,12 @@ public class SO {
         if (mapPhysicalMemory[index].was_changed()) {
             // esvazia memoria principal
             int id = mapPhysicalMemory[index].getId()*SIZE_PAGE;
-            System.out.println("Cleaning from id: " + id);
+            System.out.println("Cleaning from index " + index + " to id " + id + ", job: " + mapPhysicalMemory[index].getJob());
             copy_fst_snd(id, id+SIZE_PAGE, physicalMemory.read_page(index), secondaryMemory[mapPhysicalMemory[index].getJob()]);
             mapPhysicalMemory[index].setChanged(false);
 
             timer.setInterruption(INTERRUPTION_WRITE+INTERRUPTION_CLEAN, scheduler.getProcessControl(), scheduler.getCurrentProcess());
             scheduler.addTimePageFault(INTERRUPTION_CLEAN);
-            scheduler.addTimeBlocked(INTERRUPTION_CLEAN);
         }
 
         mapPhysicalMemory[index].setAccessed(false);
@@ -356,7 +362,7 @@ public class SO {
         load_files(scheduler.getCurrentProcess());
 
         mmu.changePagesTable(scheduler.getCurrentProcess().getPagesTable());
-        mmu.setPagesTableChangeable();
+        //mmu.setPagesTableChangeable();
 
         System.out.printf("\nCarregou CPU: %d: \n", scheduler.getProcessControl());
     }
@@ -390,16 +396,23 @@ public class SO {
 
     public void print_bench() {
         long os_time = System.nanoTime() - VarsMethods.start;
-        VarsMethods.output += "\nOS Total time: " + (os_time / 1000000d)  + "ms\n";
-        scheduler.printResults();
+        VarsMethods.output += "\nOS Total time: " + (os_time / 1000000d)  + "ms, timer: " + timer.getTimer() + "\n";
+        scheduler.printResults(timer.getTimer());
         printResults();
     }
 
     public void printResults() {
-        VarsMethods.output += "\nResultados Gerais:\n";
-        VarsMethods.output += "Timer: " + timer.getTimer() + "\n";
-        VarsMethods.output += "Tempo Ativo: " + scheduler.time_cpu + "\n";
-        VarsMethods.output += "Tempo Ocioso: " + (timer.getTimer()-scheduler.time_cpu) + "\n";
+        VarsMethods.output += "\n---- Configurações: ----\n";
+        VarsMethods.output += "Size Page: " + SIZE_PAGE + "\n";
+        VarsMethods.output += "Num Pages: " + NUM_PAGE + "\n";
+        VarsMethods.output += "Quantum: " + timer.initial_quantum + "\n";
+        VarsMethods.output += "Memory Size: " + SIZE_MEM + " * " + SIZE_PAGE + "\n";
+        VarsMethods.output += "Second Chance: " + SECOND_CHANCE + "\n";
+        VarsMethods.output += "Tempo para escrita na memória: " + INTERRUPTION_WRITE + "\n";
+        VarsMethods.output += "Tempo para esvaziar memória: " + INTERRUPTION_CLEAN + "\n";
+        VarsMethods.output += "\n---- Resultados Gerais: ----\n";
+        VarsMethods.output += "Tempo Ativo: " + scheduler.time_cpu + ", " + (scheduler.time_cpu*100/timer.getTimer()) + "\n";
+        VarsMethods.output += "Tempo Ocioso: " + (timer.getTimer()-scheduler.time_cpu) + ", " + ((timer.getTimer()-scheduler.time_cpu)*100/timer.getTimer()) + "% \n";
         VarsMethods.output += "Total de Chamadas do SO: " + (this.write_call+this.read_call+this.errors_call+this.stop_call+scheduler.getPageFault_total()) + "\n";
         VarsMethods.output += "Chamada do tipo LE: " + this.read_call + "\n";
         VarsMethods.output += "Chamada do tipo GRAVA: " + this.write_call + "\n";

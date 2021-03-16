@@ -28,6 +28,10 @@ public class Timer {
         return this.interruption.extractMin().getY();
     }
 
+    public int getNextInterruption() {
+        return interruption.CheckMin().getX() - timer;
+    }
+
     public int getTimer() {
         return timer;
     }

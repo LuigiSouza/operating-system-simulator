@@ -18,7 +18,7 @@ public class PagesTable {
     }
 
     protected PageDescriber getPage(int index) {
-        return pageDescribers[index];
+        return pageDescribers[index/sizePage];
     }
 
     public PageDescriber[] getPageDescribers() {
@@ -31,6 +31,10 @@ public class PagesTable {
 
     public void describersChanged(int address) {
         pageDescribers[address/sizePage].setChanged(true);
+    }
+
+    public void describersChangeable(int address) {
+        pageDescribers[address/sizePage].setChangeable(true);
     }
 
 }
