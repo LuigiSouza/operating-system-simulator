@@ -35,8 +35,12 @@ public class Process {
     protected int blocked_times = 0;
     protected int times_schedule = 0;
     protected int times_lost = 0;
+    protected int times_pageFault = 0;
 
-    protected int time_blocked = 0;
+    protected int time_blocked_pageFault = 0;
+    protected int time_blocked_IO = 0;
+    protected int timeBlocked = 0;
+    protected int IOCalls = 0;
     // ----------------
 
     private final int sizeProgram;

@@ -149,6 +149,8 @@ public class SO {
 
     private void deal_page_fault() {
 
+        scheduler.addPageFault();
+
         int primary_memory = deal_FIFO();
 
         int arg = mmu.getPage_fault_error();
@@ -165,7 +167,8 @@ public class SO {
 
         cpu.setCpuState(enumState.Sleep);
         timer.setInterruption(INTERRUPTION_WRITE, scheduler.getProcessControl(), scheduler.getCurrentProcess());
-
+        scheduler.addTimePageFault(INTERRUPTION_WRITE);
+        scheduler.addTimeBlocked(INTERRUPTION_WRITE);
     }
 
     private void deal_stop() {
@@ -197,7 +200,10 @@ public class SO {
             return;
         }
         timer.setInterruption(cost[arg], scheduler.getProcessControl(), scheduler.getCurrentProcess());
-        scheduler.getCurrentProcess().time_blocked += cost[arg];
+
+        scheduler.addIOCalls();
+        scheduler.addTimeBlocked(cost[arg]);
+        scheduler.addTimeIO(cost[arg]);
     }
 
     private void free_mapPhysicalMemory(Process job) {
@@ -224,7 +230,7 @@ public class SO {
         return -1;
     }
 
-    private int deal_FIFO_withChance() {
+    private int FIFO_with_second_Chance() {
         PageDescriber page;
         for(int i = 0; i < FIFO_Controller.size(); i++) {
             page = mapPhysicalMemory[FIFO_Controller.get(i)];
@@ -248,7 +254,7 @@ public class SO {
 
     private int deal_FIFO() {
 
-        int index = SECOND_CHANCE ? deal_FIFO_withChance() : default_FIFO();
+        int index = SECOND_CHANCE ? FIFO_with_second_Chance() : default_FIFO();
         System.out.print(index);
 
         if(index == -1) {
@@ -267,6 +273,8 @@ public class SO {
             mapPhysicalMemory[index].setChanged(false);
 
             timer.setInterruption(INTERRUPTION_WRITE+INTERRUPTION_CLEAN, scheduler.getProcessControl(), scheduler.getCurrentProcess());
+            scheduler.addTimePageFault(INTERRUPTION_CLEAN);
+            scheduler.addTimeBlocked(INTERRUPTION_CLEAN);
         }
 
         mapPhysicalMemory[index].setAccessed(false);
@@ -392,13 +400,14 @@ public class SO {
         VarsMethods.output += "Timer: " + timer.getTimer() + "\n";
         VarsMethods.output += "Tempo Ativo: " + scheduler.time_cpu + "\n";
         VarsMethods.output += "Tempo Ocioso: " + (timer.getTimer()-scheduler.time_cpu) + "\n";
-        VarsMethods.output += "Total de Chamadas do SO: " + (this.write_call+this.read_call+this.errors_call+this.stop_call) + "\n";
+        VarsMethods.output += "Total de Chamadas do SO: " + (this.write_call+this.read_call+this.errors_call+this.stop_call+scheduler.getPageFault_total()) + "\n";
         VarsMethods.output += "Chamada do tipo LE: " + this.read_call + "\n";
         VarsMethods.output += "Chamada do tipo GRAVA: " + this.write_call + "\n";
         VarsMethods.output += "Chamada do tipo STOP: " + this.stop_call + "\n";
         VarsMethods.output += "Chamada do tipo Ilegal: " + this.errors_call + "\n";
-        VarsMethods.output += "Trocas de Processo: " + scheduler.changes + "\n";
-        VarsMethods.output += "Numero de Preempsoes: " + scheduler.preemption_times + "\n";
+        VarsMethods.output += "Chamada de falha de página: " + scheduler.getPageFault_total() + "\n";
+        VarsMethods.output += "Trocas de Processo: " + scheduler.getChanges() + "\n";
+        VarsMethods.output += "Numero de Preempsoes: " + scheduler.getPreemption_times() + "\n";
     }
 
 

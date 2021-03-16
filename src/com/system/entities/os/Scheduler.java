@@ -22,8 +22,9 @@ public class Scheduler {
     // benchmark
     protected int time_cpu = 0;
 
-    protected int changes = 0;
-    protected int preemption_times = 0;
+    private int changes = 0;
+    private int preemption_times = 0;
+    private int pageFault_total = 0;
     // -------------
 
     private final int initial_quantum;
@@ -154,11 +155,17 @@ public class Scheduler {
             VarsMethods.output += "Tempo de Retorno: " + (job.date_end - job.date_release) + "\n";
             VarsMethods.output += "Tempo de CPU: " + job.time_cpu + "\n";
             VarsMethods.output += "Percentual de CPU: " + (job.time_cpu*100/this.time_cpu) + "% em relacao ao timer\n";
-            VarsMethods.output += "Tempo Bloqueado: " + job.time_blocked + "\n";
             VarsMethods.output += "Vezes Bloqueado: " + job.blocked_times + "\n";
             VarsMethods.output += "Vezes Escalonado: " + job.times_schedule + "\n";
-            VarsMethods.output += "Numero de vezes que a CPU foi perdida: " + job.times_lost + "\n";
+            VarsMethods.output += "Falha de Pagina: " + job.times_pageFault + "\n";
+            VarsMethods.output += "Chamadas de IO: " + job.IOCalls + "\n";
+            VarsMethods.output += "Tempo bloqueado por PageFault: " + job.time_blocked_pageFault + "\n";
+            VarsMethods.output += "Tempo bloqueado por IO: " + job.time_blocked_IO + "\n";
+            VarsMethods.output += "Tempo Bloqueado: " + job.timeBlocked + "\n";
+            VarsMethods.output += "Tempo de espera na fila de escalonamento: " + (job.time_cpu - job.timeBlocked) + "\n";
+            VarsMethods.output += "Numero de vezes que a CPU foi perdida (Quantum): " + job.times_lost + "\n";
             preemption_times += job.times_lost;
+            pageFault_total += job.times_pageFault;
         }
     }
 
@@ -170,5 +177,37 @@ public class Scheduler {
                 System.out.println(Arrays.toString(i));
             }
         }
+    }
+
+    public int getPageFault_total() {
+        return pageFault_total;
+    }
+
+    public void addTimePageFault(int time) {
+        Jobs[next_job].time_blocked_pageFault += time;
+    }
+
+    public void addTimeBlocked(int time) {
+        Jobs[next_job].timeBlocked += time;
+    }
+
+    public void addTimeIO(int time) {
+        Jobs[next_job].time_blocked_IO += time;
+    }
+
+    public void addPageFault() {
+        Jobs[next_job].times_pageFault++;
+    }
+
+    public void addIOCalls() {
+        Jobs[next_job].IOCalls++;
+    }
+
+    public int getChanges() {
+        return changes;
+    }
+
+    public int getPreemption_times() {
+        return preemption_times;
     }
 }
