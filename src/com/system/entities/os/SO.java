@@ -156,6 +156,7 @@ public class SO {
         int primary_memory = deal_FIFO();
 
         if (primary_memory == -1) {
+            System.out.println("Todos quadros ocupados, inpossível liberar espaço...");
             cpu.setCpuState(enumState.Sleep);
             scheduler.addTimeMissingPage(timer.getNextInterruption());
             scheduler.addMissingPage();
@@ -265,7 +266,6 @@ public class SO {
         int index = SECOND_CHANCE ? FIFO_with_second_Chance() : default_FIFO();
 
         if(index == -1) {
-            System.out.println("Todos quadros ocupados, inpossível liberar espaço...");
             return -1;
         }
 
@@ -411,7 +411,7 @@ public class SO {
         VarsMethods.output += "Tempo para escrita na memória: " + INTERRUPTION_WRITE + "\n";
         VarsMethods.output += "Tempo para esvaziar memória: " + INTERRUPTION_CLEAN + "\n";
         VarsMethods.output += "\n---- Resultados Gerais: ----\n";
-        VarsMethods.output += "Tempo Ativo: " + scheduler.time_cpu + ", " + (scheduler.time_cpu*100/timer.getTimer()) + "\n";
+        VarsMethods.output += "Tempo Ativo: " + scheduler.time_cpu + ", " + (scheduler.time_cpu*100/timer.getTimer()) + "%\n";
         VarsMethods.output += "Tempo Ocioso: " + (timer.getTimer()-scheduler.time_cpu) + ", " + ((timer.getTimer()-scheduler.time_cpu)*100/timer.getTimer()) + "% \n";
         VarsMethods.output += "Total de Chamadas do SO: " + (this.write_call+this.read_call+this.errors_call+this.stop_call+scheduler.getPageFault_total()) + "\n";
         VarsMethods.output += "Chamada do tipo LE: " + this.read_call + "\n";
@@ -455,5 +455,9 @@ public class SO {
         for (int[] sec : secondaryMemory)
             System.out.println(Arrays.toString(sec));
         System.out.println("");
+    }
+
+    public void printTimer() {
+        timer.printTimer();
     }
 }

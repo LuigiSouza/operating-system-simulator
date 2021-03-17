@@ -158,13 +158,13 @@ public class Scheduler {
             VarsMethods.output += "Vezes Bloqueado: " + job.blocked_times + "\n";
             VarsMethods.output += "Vezes Escalonado: " + job.times_schedule + "\n";
             VarsMethods.output += "Falha de Pagina: " + job.times_pageFault + "\n";
-            VarsMethods.output += "Falta de Pagina: " + job.timeBlocked_missingPage + "\n";
+            VarsMethods.output += "Falta de Pagina: " + job.times_blocked_MissingPage + "\n";
             VarsMethods.output += "Chamadas de IO: " + job.IOCalls + "\n";
             VarsMethods.output += "Tempo bloqueado por PageFault: " + job.time_blocked_pageFault + "\n";
-            VarsMethods.output += "Tempo bloqueado por MissingPageFault: " + job.times_blocked_MissingPage + "\n";
+            VarsMethods.output += "Tempo bloqueado por MissingPageFault: " + job.timeBlocked_missingPage + "\n";
             VarsMethods.output += "Tempo bloqueado por IO: " + job.time_blocked_IO + "\n";
-            VarsMethods.output += "Tempo Bloqueado: " + (job.time_blocked_IO + job.time_blocked_pageFault + job.times_blocked_MissingPage) + "\n";
-            VarsMethods.output += "Tempo de espera na fila de escalonamento: " + ((job.date_end - job.date_release) - (job.time_blocked_IO + job.time_blocked_pageFault + job.times_blocked_MissingPage)) + "\n";
+            VarsMethods.output += "Tempo Bloqueado: " + (job.time_blocked_IO + job.time_blocked_pageFault + job.timeBlocked_missingPage) + "\n";
+            VarsMethods.output += "Tempo de espera na fila de escalonamento: " + ((job.date_end - job.date_release - job.time_cpu) - (job.time_blocked_IO + job.time_blocked_pageFault + job.timeBlocked_missingPage)) + "\n";
             VarsMethods.output += "Numero de vezes que a CPU foi perdida (Quantum): " + job.times_lost + "\n";
             preemption_times += job.times_lost;
             pageFault_total += job.times_pageFault;
@@ -190,7 +190,8 @@ public class Scheduler {
     }
 
     public void addTimeMissingPage(int time) {
-        Jobs[next_job].times_blocked_MissingPage += time;
+        Jobs[next_job].timeBlocked_missingPage += time;
+        System.out.println(Jobs[next_job].timeBlocked_missingPage);
     }
 
     public void addTimeIO(int time) {

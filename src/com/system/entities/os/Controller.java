@@ -26,6 +26,7 @@ public class Controller {
 
             if (pause == enumStatus.Next.getStatus() || pause == enumStatus.Syscall.getStatus()){
                 //so.printMemory();
+                //so.printTimer();
                 so.scheduler.getCurrentProcess().time_cpu++;
                 so.scheduler.time_cpu++;
                 SO.subQuantum();

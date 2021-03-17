@@ -1,6 +1,7 @@
 package com.system.handlers;
 
 import javax.swing.plaf.synth.SynthSpinnerUI;
+import java.util.Arrays;
 
 // Java program to implement Max Heap
 // Code from: https://www.geeksforgeeks.org/min-heap-in-java/
@@ -51,7 +52,7 @@ public class MinHeap {
     // to fix the root.
     private void minHeapify(int pos)
     {
-        if (isLeaf(pos) || size <= 0)
+        if (isLeaf(pos) || size <= 0 || Heap[leftChild(pos)] == null || Heap[rightChild(pos)] == null)
             return;
 
         if (Heap[pos].getX() > Heap[leftChild(pos)].getX()
@@ -66,6 +67,18 @@ public class MinHeap {
                 swap(pos, rightChild(pos));
                 minHeapify(rightChild(pos));
             }
+        }
+    }
+
+    // Function to print the contents of the heap
+    public void print()
+    {
+        for (int i = 1; i <= size / 2; i++) {
+            System.out.print(
+                    "PARENT : " + Heap[i].getX() + " " + Heap[i].getY()
+                            + " LEFT CHILD : " + (Heap[2 * i] != null ? (Heap[2 * i].getX() + " " + Heap[2 * i].getY()) : null)
+                            + " RIGHT CHILD :" + (Heap[2 * i + 1] != null ? (Heap[2 * i + 1].getX() + " " + Heap[2 * i + 1].getY()) : null));
+            System.out.println();
         }
     }
 
@@ -89,15 +102,18 @@ public class MinHeap {
 
     public void remove_periodic() {
         int j = -1;
-        for (int i = 1; i < size && j != i-1; i++) {
+        for (int i = 1; i <= size && j != i-1; i++)
             if (Heap[i].getY() == -2)
                 j = i;
-        }
+
 
         if (j == -1) return;
 
-        Tuple popped = Heap[j];
-        Heap[j] = Heap[size--];
+        if(j < maxsize)
+            while (j < size)
+                Heap[j] = Heap[++j];
+
+        size--;
 
         minHeapify(1);
     }
